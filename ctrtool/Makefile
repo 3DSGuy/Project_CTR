@@ -11,7 +11,7 @@ CXX = g++
 ifeq ($(OS),Windows_NT)
     #Windows Build CFG
     CFLAGS += -Wno-unused-but-set-variable
-    LIBS += -static-libgcc -static-libstdc++
+    LIBS += -static -static-libgcc -static-libstdc++ -lpthread -L libwinpthread-1.dll
 else
     UNAME_S := $(shell uname -s)
     ifeq ($(UNAME_S),Darwin)
