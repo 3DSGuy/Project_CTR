@@ -173,14 +173,14 @@ unsigned char* settings_get_common_keyX(settings* usersettings)
 	GETKEY(usersettings, commonkeyX);
 }
 
-unsigned char* settings_get_common_keyY(settings* usersettings, int index)
+const unsigned char* settings_get_common_keyY(settings* usersettings, int index)
 {
 	if (index == 0) { 
 		// application titles
 		GETKEY(usersettings, commonkeyY_zero);
 	}
 	else if (0 < index && index < 6) {
-		const u8 keyYs[5][16] = {
+		static const u8 keyYs[5][16] = {
 			// system titles
 			{ 0x0c, 0x76, 0x72, 0x30, 0xf0, 0x99, 0x8f, 0x1c, 0x46, 0x82, 0x82, 0x02, 0xfa, 0xac, 0xbe, 0x4c },
 			// these are unused
