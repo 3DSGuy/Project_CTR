@@ -61,6 +61,7 @@ typedef struct
 
 	key128 titlekey;
 	key128 commonkeyX;
+	key128 commonkeyY_zero;
 	key128 ncchfixedsystemkey;
 	key128 ncchkeyX_old;
 	key128 ncchkeyX_seven;
@@ -76,6 +77,7 @@ void keyset_init(keyset* keys, u32 actions);
 int keyset_load(keyset* keys, const char* fname, int verbose);
 void keyset_merge(keyset* keys, keyset* src);
 void keyset_parse_commonkeyX(keyset* keys, char* keytext, int keylen);
+void keyset_parse_commonkeyY_zero(keyset* keys, char* keytext, int keylen);
 void keyset_parse_titlekey(keyset* keys, char* keytext, int keylen);
 void keyset_parse_ncchkeyX_old(keyset* keys, char* keytext, int keylen);
 void keyset_parse_ncchfixedsystemkey(keyset* keys, char* keytext, int keylen);
