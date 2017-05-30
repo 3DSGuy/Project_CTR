@@ -52,6 +52,7 @@ unsigned char* settings_get_ncchkeyX_seven(settings* usersettings);
 unsigned char* settings_get_ncchkeyX_ninethree(settings* usersettings);
 unsigned char* settings_get_ncchkeyX_ninesix(settings* usersettings);
 unsigned char* settings_get_common_keyX(settings* usersettings);
+const unsigned char* settings_get_common_keyY(settings* usersettings, int index);
 unsigned char* settings_get_seed(settings* usersettings, u64 title_id);
 unsigned char* settings_get_title_key(settings* usersettings);
 int settings_get_ignore_programid(settings* usersettings);
