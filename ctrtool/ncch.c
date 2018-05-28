@@ -831,7 +831,7 @@ void ncch_print(ncch_context* ctx)
 	else
 		memdump(stdout, "Logo hash (FAIL):       ", header->logohash, 0x20);
 	fprintf(stdout, "Product code:           %.16s\n", header->productcode);
-	fprintf(stdout, "Exheader size:          0x400\n");
+	fprintf(stdout, "Exheader size:          00000400\n"); //this is always the same
 	if (ctx->exheaderhashcheck == Unchecked)
 		memdump(stdout, "Exheader hash:          ", header->extendedheaderhash, 0x20);
 	else if (ctx->exheaderhashcheck == Good)
