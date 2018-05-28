@@ -416,6 +416,12 @@ void ncch_process(ncch_context* ctx, u32 actions)
 		return;
 	}
 
+	if (getle32(ctx->header.extendedheadersize) != 0x400)
+	{
+		fprintf(stdout, "Error, exheader is 0x%02x bytes long, expected 0x0400\n", getle32(ctx->header.extendedheadersize));
+		return;
+	}
+
 	ncch_determine_key(ctx, actions);
 
 	ncch_get_counter(ctx, exheadercounter, NCCHTYPE_EXHEADER);
@@ -619,9 +625,9 @@ void ncch_determine_key(ncch_context* ctx, u32 actions)
 	// Check if the NCCH is already decrypted, by checking if the exheader hash matches
 	// Otherwise, use determination rules
 	fseeko64(ctx->file, ncch_get_exheader_offset(ctx), SEEK_SET);
-	memset(exheader_buffer, 0, getle32(header->extendedheadersize));
-	fread(exheader_buffer, 1, getle32(header->extendedheadersize), ctx->file);
-	ctr_sha_256(exheader_buffer, getle32(header->extendedheadersize), hash);
+	memset(exheader_buffer, 0, 0x400);
+	fread(exheader_buffer, 1, 0x400, ctx->file);
+	ctr_sha_256(exheader_buffer, 0x400, hash);
 	if (!memcmp(hash, header->extendedheaderhash, 32))
 	{
 		// exheader hash matches, so probably decrypted
@@ -825,7 +831,7 @@ void ncch_print(ncch_context* ctx)
 	else
 		memdump(stdout, "Logo hash (FAIL):       ", header->logohash, 0x20);
 	fprintf(stdout, "Product code:           %.16s\n", header->productcode);
-	fprintf(stdout, "Exheader size:          %08x\n", getle32(header->extendedheadersize));
+	fprintf(stdout, "Exheader size:          0x400\n");
 	if (ctx->exheaderhashcheck == Unchecked)
 		memdump(stdout, "Exheader hash:          ", header->extendedheaderhash, 0x20);
 	else if (ctx->exheaderhashcheck == Good)
