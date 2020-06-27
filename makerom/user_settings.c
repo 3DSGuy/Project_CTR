@@ -40,6 +40,11 @@ int ParseArgs(int argc, char *argv[], user_settings *set)
 		fprintf(stderr, "[SETTING ERROR] Not Enough Memory\n");
 		return USR_MEM_ERROR;
 	}
+	// Initialise Content Path Ptrs to NULL
+	for (size_t i = 0; i < CIA_MAX_CONTENT; i++)
+	{
+		set->common.contentPath[i] = NULL;
+	}
 
 	// Initialise Keys
 	InitKeys(&set->common.keys);
