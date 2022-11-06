@@ -241,16 +241,11 @@ void ctrtool::CciProcess::importHeader()
 		// only verify if the enabled bit is set
 		if (mHeader.ncsd_header.card_ext.crypto_type.enabled)
 		{
-			mValidCryptoType = mHeader.ncsd_header.card_ext.crypto_type.value == mHeader.card_info.flag.crypto_type ? ValidState::Good : ValidState::Fail;
-		}
-		else
-		{
-			mValidCryptoType = ValidState::Good;
-		}
+			mValidCryptoType = mHeader.card_info.flag.crypto_type == mHeader.ncsd_header.card_ext.crypto_type.value ? ValidState::Good : ValidState::Fail;
 
-		if (mValidCryptoType != ValidState::Good)
-		{
-			fmt::print(stderr, "[{} ERROR] CryptoType was invalid.\n", mModuleLabel);
+			if (mValidCryptoType != ValidState::Good) {
+				fmt::print(stderr, "[{} ERROR] CryptoType was invalid.\n", mModuleLabel);
+			}
 		}
 	}
 
