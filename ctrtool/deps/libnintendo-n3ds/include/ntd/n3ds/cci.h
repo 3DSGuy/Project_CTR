@@ -79,10 +79,20 @@ struct NcsdCommonHeader
 
 	struct GameCardExtendedHeader
 	{
+		struct CryptoType
+		{
+			byte_t enabled : 1;
+			byte_t value : 2;
+			byte_t reserved : 5;
+		};
+
 		// 0x90
 		std::array<tc::bn::le64<uint64_t>, kPartitionNum> partition_id;
 		// 0xD0
-		tc::bn::pad<0x30>                                 reserved;
+		tc::bn::pad<0x2E>                                 reserved;
+		// 0xFE
+		CryptoType                                        crypto_type;
+		byte_t                                            backup_security_version;
 	};
 
 	struct NandExtendedHeader

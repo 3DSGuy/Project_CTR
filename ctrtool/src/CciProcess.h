@@ -43,6 +43,7 @@ private:
 	int64_t mUsedImageSize;
 	byte_t mValidSignature;
 	byte_t mValidInitialDataMac;
+	byte_t mValidCryptoType;
 	ntd::n3ds::CciHeader mHeader;
 	tc::Optional<KeyBag::Aes128Key> mDecryptedTitleKey;
 	ctrtool::NcchProcess mNcchProcess;

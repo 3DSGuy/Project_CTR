@@ -22,6 +22,7 @@ ctrtool::CciProcess::CciProcess() :
 	mUsedImageSize(0),
 	mValidSignature(ValidState::Unchecked),
 	mValidInitialDataMac(ValidState::Unchecked),
+	mValidCryptoType(ValidState::Unchecked),
 	mDecryptedTitleKey(),
 	mNcchProcess(),
 	mFsReader()
@@ -234,6 +235,25 @@ void ctrtool::CciProcess::importHeader()
 		fmt::print(stderr, "[{} ERROR] Failed to determine key to decrypt InitialData.\n", mModuleLabel);
 	}
 
+	// verify crypto type
+	if (mVerify)
+	{
+		// only verify if the enabled bit is set
+		if (mHeader.ncsd_header.card_ext.crypto_type.enabled)
+		{
+			mValidCryptoType = mHeader.ncsd_header.card_ext.crypto_type.value == mHeader.card_info.flag.crypto_type ? ValidState::Good : ValidState::Fail;
+		}
+		else
+		{
+			mValidCryptoType = ValidState::Good;
+		}
+
+		if (mValidCryptoType != ValidState::Good)
+		{
+			fmt::print(stderr, "[{} ERROR] CryptoType was invalid.\n", mModuleLabel);
+		}
+	}
+
 	// open fs reader
 	mFsReader = std::shared_ptr<tc::io::VirtualFileSystem>(new tc::io::VirtualFileSystem(ntd::n3ds::CciFsShapshotGenerator(mInputStream)));
 }
@@ -294,7 +314,7 @@ void ctrtool::CciProcess::printHeader()
 	}
 	fmt::print(" Flags:                  {}\n", tc::cli::FormatUtil::formatBytesAsString(mHeader.ncsd_header.flags.data(), mHeader.ncsd_header.flags.size(), true, ""));
 	fmt::print("  BackupWriteWaitTime:   {:02x}\n", (uint32_t)mHeader.ncsd_header.flags[mHeader.NcsdFlagIndex_BackupWriteWaitTime]);
-	fmt::print("  BackupSecurityVersion: {:02x}\n", (uint32_t)mHeader.ncsd_header.flags[mHeader.NcsdFlagIndex_BackupSecurityVersion]);
+	fmt::print("  BackupSecurityVersion: {:02x}\n", (uint32_t)mHeader.ncsd_header.flags[mHeader.NcsdFlagIndex_BackupSecurityVersion] + mHeader.ncsd_header.card_ext.backup_security_version);
 	fmt::print("  CardInfo:              {:02x}\n", (uint32_t)mHeader.ncsd_header.flags[mHeader.NcsdFlagIndex_CardInfo]);
 	byte_t card_device = (mHeader.ncsd_header.flags[mHeader.NcsdFlagIndex_CardDevice] | mHeader.ncsd_header.flags[mHeader.NcsdFlagIndex_CardDevice_Deprecated]);
 	fmt::print("  CardDevice:            {:02x} ({})\n", (uint32_t)card_device, getCardDeviceString(card_device));
@@ -314,7 +334,7 @@ void ctrtool::CciProcess::printHeader()
 	fmt::print("CardInfo:\n");
 	fmt::print(" WriteableRegion:        0x{:08X}\n", mHeader.card_info.writable_region.unwrap());
 	fmt::print(" CardType:               {} ({:X})\n", getCardTypeString(mHeader.card_info.flag.card_type), (uint32_t)mHeader.card_info.flag.card_type);
-	fmt::print(" CryptoType:             {} ({:X})\n", getCryptoTypeString(mHeader.card_info.flag.crypto_type), (uint32_t)mHeader.card_info.flag.crypto_type);
+	fmt::print(" CryptoType: {:6}      {} ({:X})\n", getValidString(mValidCryptoType), getCryptoTypeString(mHeader.card_info.flag.crypto_type), (uint32_t)mHeader.card_info.flag.crypto_type);
 	
 	// mastering metadata
 	fmt::print("MasteringMetadata:\n");
