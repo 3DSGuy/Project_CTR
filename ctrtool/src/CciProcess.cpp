@@ -243,7 +243,8 @@ void ctrtool::CciProcess::importHeader()
 		{
 			mValidCryptoType = mHeader.card_info.flag.crypto_type == mHeader.ncsd_header.card_ext.crypto_type.value ? ValidState::Good : ValidState::Fail;
 
-			if (mValidCryptoType != ValidState::Good) {
+			if (mValidCryptoType != ValidState::Good)
+			{
 				fmt::print(stderr, "[{} ERROR] CryptoType was invalid.\n", mModuleLabel);
 			}
 		}
