@@ -489,8 +489,7 @@ void ctrtool::NcchProcess::determineRegionEncryption()
 
 					// quick header validation
 					if (exefs_hdr.file_table[0].name[0] == 0 ||
-					    exefs_hdr.file_table[0].offset.unwrap() != 0 ||
-					    exefs_hdr.getFileHash(0)->operator[](0) == 0)
+					    exefs_hdr.file_table[0].offset.unwrap() != 0)
 					{
 						throw tc::ArgumentOutOfRangeException(mModuleLabel, "ExeFsHeader is corrupted (Bad first entry).");
 					}

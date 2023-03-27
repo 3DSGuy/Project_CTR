@@ -94,7 +94,7 @@ void ctrtool::ExeFsProcess::importHeader()
 	mInputStream->read((byte_t*)&mHeader, sizeof(ntd::n3ds::ExeFsHeader));
 
 	// do some simple checks to verify if this is an EXEFS header
-	if (mHeader.file_table[0].name[0] == 0 || mHeader.file_table[0].offset.unwrap() != 0 || mHeader.hash_table[ntd::n3ds::ExeFsHeader::kFileNum - 1][0] == 0)
+	if (mHeader.file_table[0].name[0] == 0 || mHeader.file_table[0].offset.unwrap() != 0)
 	{
 		throw tc::ArgumentOutOfRangeException(mModuleLabel, "ExeFsHeader is corrupted (Bad first entry).");
 	}

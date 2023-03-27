@@ -33,7 +33,7 @@ ntd::n3ds::ExeFsSnapshotGenerator::ExeFsSnapshotGenerator(const std::shared_ptr<
 	stream->seek(0, tc::io::SeekOrigin::Begin);
 	stream->read((byte_t*)(&hdr), sizeof(ntd::n3ds::ExeFsHeader));
 
-	if (hdr.file_table[0].name[0] == 0 || hdr.file_table[0].offset.unwrap() != 0 || hdr.hash_table[ntd::n3ds::ExeFsHeader::kFileNum - 1][0] == 0)
+	if (hdr.file_table[0].name[0] == 0 || hdr.file_table[0].offset.unwrap() != 0)
 	{
 		throw tc::ArgumentOutOfRangeException("ntd::n3ds::ExeFsSnapshotGenerator", "ExeFsHeader is corrupted (Bad first entry).");
 	}
