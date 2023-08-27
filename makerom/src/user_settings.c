@@ -95,6 +95,7 @@ void SetDefaults(user_settings *set)
 	set->common.outFormat = NCCH;
 	set->ncch.ncchType = format_not_set;
 	set->ncch.noCodePadding = false;
+	set->ncch.pageSize = 0x1000;
 
 	// RSF Settings
 	clrmem(&set->common.rsfSet, sizeof(rsf_settings));
@@ -370,6 +371,14 @@ int SetArgument(int argc, int i, char *argv[], user_settings *set)
 		}
 		set->ncch.baremetal = true;
 		return 1;
+	} else if (strcmp(argv[i], "-pagesize") == 0) {
+		if (ParamNum != 1) {
+			PrintArgReqParam(argv[i], 1);
+			return USR_BAD_ARG;
+		}
+		u32 pgsz = strtoul(argv[i + 1], NULL, 0);
+		set->ncch.pageSize = pgsz;
+		return 2;
 	}
 
 	// Ncch Rebuild Options

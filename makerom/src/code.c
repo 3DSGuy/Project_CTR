@@ -6,8 +6,7 @@
 
 #include <blz.h>
 
-const u32 CTR_PAGE_SIZE = 0x1000;
-const u32 DEFAULT_STACK_SIZE = 0x4000; // 10KB
+static const u32 DEFAULT_STACK_SIZE = 0x4000; // 10KB
 
 typedef struct code_segment
 {
@@ -18,14 +17,14 @@ typedef struct code_segment
 	const u8 *data;
 } code_segment;
 
-u32 SizeToPage(u32 memorySize)
+u32 SizeToPage(u32 memorySize, u32 pageSize)
 {
-	return align(memorySize, CTR_PAGE_SIZE) / CTR_PAGE_SIZE;
+	return align(memorySize, pageSize) / pageSize;
 }
 
-u32 PageToSize(u32 pageNum)
+u32 PageToSize(u32 pageNum, u32 pageSize)
 {
-	return pageNum * CTR_PAGE_SIZE;
+	return pageNum * pageSize;
 }
 
 int ImportPlainRegionFromFile(ncch_settings *set)
@@ -123,7 +122,7 @@ int ImportPlainRegionFromElf(elf_context *elf, ncch_settings *set)
 	return 0;
 }
 
-void CreateCodeSegmentFromElf(code_segment *out, elf_context *elf, u64 segment_flags, bool baremetal, u32 baremetalOrder)
+void CreateCodeSegmentFromElf(code_segment *out, elf_context *elf, u64 segment_flags, u32 pageSize, bool baremetal, u32 baremetalOrder)
 {
 	u32 segmentNum = elf_SegmentNum(elf);
 	const elf_segment *segments = elf_GetSegments(elf);
@@ -169,7 +168,7 @@ void CreateCodeSegmentFromElf(code_segment *out, elf_context *elf, u64 segment_f
 		out->address = segments[foundSegmentId].vAddr;
 		out->memSize = segments[foundSegmentId].memSize;
 		out->fileSize = segments[foundSegmentId].fileSize;
-		out->pageNum = SizeToPage(out->fileSize);
+		out->pageNum = SizeToPage(out->fileSize, pageSize);
 		out->data = segments[foundSegmentId].ptr;
 	}
 }
@@ -182,9 +181,10 @@ int CreateExeFsCode(elf_context *elf, ncch_settings *set)
 	code_segment rwdata;
 
 	bool baremetal = set->options.baremetal;
-	CreateCodeSegmentFromElf(&text, elf, PF_TEXT, baremetal, 0);
-	CreateCodeSegmentFromElf(&rodata, elf, PF_RODATA, baremetal, 1);
-	CreateCodeSegmentFromElf(&rwdata, elf, PF_DATA, baremetal, 2);
+	u32 pageSize = set->options.pageSize;
+	CreateCodeSegmentFromElf(&text, elf, PF_TEXT, pageSize, baremetal, 0);
+	CreateCodeSegmentFromElf(&rodata, elf, PF_RODATA, pageSize, baremetal, 1);
+	CreateCodeSegmentFromElf(&rwdata, elf, PF_DATA, pageSize, baremetal, 2);
 
 	/* Checking the existence of essential ELF Segments */
 	if (!text.fileSize) return NOT_FIND_TEXT_SEGMENT;
@@ -196,14 +196,14 @@ int CreateExeFsCode(elf_context *elf, ncch_settings *set)
 		size = text.fileSize + rodata.fileSize + rwdata.fileSize;
 	}
 	else {
-		size = PageToSize(text.pageNum + rodata.pageNum + rwdata.pageNum);
+		size = PageToSize(text.pageNum + rodata.pageNum + rwdata.pageNum, pageSize);
 	}
 	u8 *code = calloc(1, size);
 
 	/* Writing Code into Buffer */
 	u8 *textPos = code;
-	u8 *rodataPos = (textPos + (noCodePadding ? text.fileSize : PageToSize(text.pageNum)));
-	u8 *rwdataPos = (rodataPos + (noCodePadding ? rodata.fileSize : PageToSize(rodata.pageNum)));
+	u8 *rodataPos = (textPos + (noCodePadding ? text.fileSize : PageToSize(text.pageNum, pageSize)));
+	u8 *rwdataPos = (rodataPos + (noCodePadding ? rodata.fileSize : PageToSize(rodata.pageNum, pageSize)));
 	if (text.fileSize) memcpy(textPos, text.data, text.fileSize);
 	if (rodata.fileSize) memcpy(rodataPos, rodata.data, rodata.fileSize);
 	if (rwdata.fileSize) memcpy(rwdataPos, rwdata.data, rwdata.fileSize);

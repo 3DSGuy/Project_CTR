@@ -10,6 +10,7 @@ typedef struct
 	struct
 	{
 		u32 blockSize;
+		u32 pageSize;
 		bool verbose;
 		bool IncludeExeFsLogo;
 		bool CompressCode;

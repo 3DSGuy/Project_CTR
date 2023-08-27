@@ -269,6 +269,7 @@ typedef struct
 		char *romfsPath; // Prebuild _cleartext_ romfs binary
 		bool noCodePadding; // do not pad code.bin for sysmodule
 		bool baremetal; // abuse K9/LGY K11's lack of memory management to support arbitrary VMA and RWX phdr
+		u32 pageSize; // Memory page size (256 for Kernel9, 4096 for anything else)
 		bool useSecCrypto;
 		u8 keyXID;
 	} ncch; // Ncch0 Build

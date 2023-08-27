@@ -239,6 +239,7 @@ int GetBasicOptions(ncch_settings *ncchset, user_settings *usrset)
 	ncchset->options.UseRomFS = ((ncchset->rsfSet->RomFs.RootPath && strlen(ncchset->rsfSet->RomFs.RootPath) > 0) || usrset->ncch.romfsPath);
 	ncchset->options.noCodePadding = usrset->ncch.noCodePadding;
 	ncchset->options.baremetal = usrset->ncch.baremetal;
+	ncchset->options.pageSize = usrset->ncch.pageSize;
 	ncchset->options.useSecCrypto = usrset->ncch.useSecCrypto;
 	ncchset->options.keyXID = usrset->ncch.keyXID;
 	
@@ -879,7 +880,6 @@ int VerifyNcch(u8 *ncch, keys_struct *keys, bool CheckHash, bool SuppressOutput)
 		if(!acexDesc){ 
 			fprintf(stderr,"[NCCH ERROR] Not enough memory\n"); 
 			free(ncchInfo);
-			free(exHdr);
 			return MEM_ERROR; 
 		}
 		memcpy(acexDesc,ncch+ncchInfo->acexOffset,ncchInfo->acexSize);
