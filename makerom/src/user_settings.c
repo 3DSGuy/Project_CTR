@@ -363,6 +363,14 @@ int SetArgument(int argc, int i, char *argv[], user_settings *set)
 		set->ncch.noCodePadding = true;
 		return 1;
 	}
+	else if (strcmp(argv[i], "-baremetal") == 0) {
+		if (ParamNum) {
+			PrintNoNeedParam(argv[i]);
+			return USR_BAD_ARG;
+		}
+		set->ncch.baremetal = true;
+		return 1;
+	}
 
 	// Ncch Rebuild Options
 	else if (strcmp(argv[i], "-code") == 0) {

@@ -20,7 +20,8 @@ typedef struct
 		bool IsBuildingCodeSection;
 		bool UseRomFS;
 		bool noCodePadding;
-		
+		bool baremetal;
+
 		bool useSecCrypto;
 		u8 keyXID;
 	} options;

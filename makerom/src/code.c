@@ -123,10 +123,11 @@ int ImportPlainRegionFromElf(elf_context *elf, ncch_settings *set)
 	return 0;
 }
 
-void CreateCodeSegmentFromElf(code_segment *out, elf_context *elf, u64 segment_flags)
+void CreateCodeSegmentFromElf(code_segment *out, elf_context *elf, u64 segment_flags, bool baremetal, u32 baremetalOrder)
 {
 	u32 segmentNum = elf_SegmentNum(elf);
 	const elf_segment *segments = elf_GetSegments(elf);
+	u16 foundSegmentId = segmentNum;
 
 	/* Initialise struct data */
 	out->address = 0;
@@ -135,23 +136,41 @@ void CreateCodeSegmentFromElf(code_segment *out, elf_context *elf, u64 segment_f
 	out->fileSize = 0;
 	out->data = NULL;
 
-	/* Find segment */
-	for (u16 i = 0; i < segmentNum; i++) {
-		/*	Skip SDK ELF .module_id segment
-			The last segment should always be data in valid ELFs, 
-			unless this is an SDK ELF with .module_id segment */
-		if (i == segmentNum-1 && segments[i].flags == PF_RODATA)
-			continue;
+	if (baremetal) {
+		/*	With Kernel9 and with LGY firm K11, everything is RWX with no memory management.
+			While it is a bit hard to replicate what Nintendo do with their toolchain, we can
+			abuse how these kernels work and remove meaning from "text segment" etc.
 
-		/* Found segment */
-		if ((segments[i].flags & ~PF_CTRSDK) == segment_flags && segments[i].type == PT_LOAD) {
-			out->address = segments[i].vAddr;
-			out->memSize = segments[i].memSize;
-			out->fileSize = segments[i].fileSize;
-			out->pageNum = SizeToPage(out->fileSize);
-			out->data = segments[i].ptr;
-			break;
+			The other option would be to add support for multiple phdr per "section" and allow
+			for RWX phdrs (and perhaps parse phdr list from .rsf), plus read LMA instead of VMA below,
+			but that's a lot more work compared to this dirty workaround.
+
+			First segment defines entrypoint and LMA for the rest of the image.*/
+		if (baremetalOrder < segmentNum && (segments[baremetalOrder].flags & segment_flags) == segment_flags && segments[baremetalOrder].type == PT_LOAD)
+			foundSegmentId = baremetalOrder;
+	} else {
+		/* Find segment */
+		for (u16 i = 0; i < segmentNum; i++) {
+			/*	Skip SDK ELF .module_id segment
+				The last segment should always be data in valid ELFs,
+				unless this is an SDK ELF with .module_id segment */
+			if (i == segmentNum-1 && segments[i].flags == PF_RODATA)
+				continue;
+
+			/* Found segment */
+			if ((segments[i].flags & ~PF_CTRSDK) == segment_flags && segments[i].type == PT_LOAD) {
+				foundSegmentId = i;
+				break;
+			}
 		}
+	}
+
+	if (foundSegmentId < segmentNum) {
+		out->address = segments[foundSegmentId].vAddr;
+		out->memSize = segments[foundSegmentId].memSize;
+		out->fileSize = segments[foundSegmentId].fileSize;
+		out->pageNum = SizeToPage(out->fileSize);
+		out->data = segments[foundSegmentId].ptr;
 	}
 }
 
@@ -162,15 +181,16 @@ int CreateExeFsCode(elf_context *elf, ncch_settings *set)
 	code_segment rodata;
 	code_segment rwdata;
 
-	CreateCodeSegmentFromElf(&text, elf, PF_TEXT);
-	CreateCodeSegmentFromElf(&rodata, elf, PF_RODATA);
-	CreateCodeSegmentFromElf(&rwdata, elf, PF_DATA);
+	bool baremetal = set->options.baremetal;
+	CreateCodeSegmentFromElf(&text, elf, PF_TEXT, baremetal, 0);
+	CreateCodeSegmentFromElf(&rodata, elf, PF_RODATA, baremetal, 1);
+	CreateCodeSegmentFromElf(&rwdata, elf, PF_DATA, baremetal, 2);
 
 	/* Checking the existence of essential ELF Segments */
 	if (!text.fileSize) return NOT_FIND_TEXT_SEGMENT;
 
 	/* Allocating Buffer for ExeFs Code */
-	bool noCodePadding = set->options.noCodePadding;
+	bool noCodePadding = set->options.noCodePadding || baremetal;
 	u32 size;
 	if (noCodePadding) {
 		size = text.fileSize + rodata.fileSize + rwdata.fileSize;
@@ -219,7 +239,7 @@ int CreateExeFsCode(elf_context *elf, ncch_settings *set)
 	set->codeDetails.rwSize = rwdata.fileSize;
 
 	/* Calculating BSS size */
-	if (rwdata.fileSize) {
+	if (rwdata.fileSize && !baremetal) {
 		set->codeDetails.bssSize = rwdata.memSize - rwdata.fileSize;
 	}
 	else {
@@ -313,7 +333,7 @@ finish:
 	default:
 		fprintf(stderr, "[CODE ERROR] Failed to process ELF file (%d)\n", result);
 	}
-	
+
 	elf_Free(&elf);
 	free(elfFile);
 	return result;

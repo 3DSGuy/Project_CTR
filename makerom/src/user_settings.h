@@ -268,7 +268,7 @@ typedef struct
 		char *plainRegionPath; // prebuilt Plain Region
 		char *romfsPath; // Prebuild _cleartext_ romfs binary
 		bool noCodePadding; // do not pad code.bin for sysmodule
-		
+		bool baremetal; // abuse K9/LGY K11's lack of memory management to support arbitrary VMA and RWX phdr
 		bool useSecCrypto;
 		u8 keyXID;
 	} ncch; // Ncch0 Build
