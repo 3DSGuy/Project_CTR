@@ -78,7 +78,7 @@ int BuildExHeader(ncch_settings *ncchset)
 
 	exheader_settings *exhdrset = calloc(1,sizeof(exheader_settings));
 	if(!exhdrset) {
-		fprintf(stderr,"[EXHEADER ERROR] Not enough memory\n"); 
+		fprintf(stderr,"[EXHEADER ERROR] Not enough memory\n");
 		return MEM_ERROR;
 	}
 
@@ -114,14 +114,14 @@ int get_ExHeaderSettingsFromNcchset(exheader_settings *exhdrset, ncch_settings *
 	ncchset->sections.exhdr.size = sizeof(extended_hdr);
 	ncchset->sections.exhdr.buffer = calloc(1,ncchset->sections.exhdr.size);
 	if(!ncchset->sections.exhdr.buffer) {
-		fprintf(stderr,"[EXHEADER ERROR] Not enough memory\n"); 
+		fprintf(stderr,"[EXHEADER ERROR] Not enough memory\n");
 		return MEM_ERROR;
 	}
-	
+
 	ncchset->sections.acexDesc.size = sizeof(access_descriptor);
 	ncchset->sections.acexDesc.buffer = calloc(1,ncchset->sections.acexDesc.size);
 	if(!ncchset->sections.acexDesc.buffer) {
-		fprintf(stderr,"[EXHEADER ERROR] Not enough memory\n"); 
+		fprintf(stderr,"[EXHEADER ERROR] Not enough memory\n");
 		return MEM_ERROR;
 	}
 
@@ -161,27 +161,27 @@ int get_ExHeaderSettingsFromRsf(exheader_settings *exhdrset)
 {
 	int result = 0;
 	if(!exhdrset->useAccessDescPreset){
-		if((result = get_ExHeaderCodeSetInfo(&exhdrset->exHdr->codeSetInfo, exhdrset->rsf))) 
+		if((result = get_ExHeaderCodeSetInfo(&exhdrset->exHdr->codeSetInfo, exhdrset->rsf)))
 			goto finish;
-		if((result = get_ExHeaderDependencyList((u8*)exhdrset->exHdr->dependencyList, exhdrset->rsf))) 
+		if((result = get_ExHeaderDependencyList((u8*)exhdrset->exHdr->dependencyList, exhdrset->rsf)))
 			goto finish;
-		if((result = get_ExHeaderSystemInfo(&exhdrset->exHdr->systemInfo, exhdrset->rsf))) 
+		if((result = get_ExHeaderSystemInfo(&exhdrset->exHdr->systemInfo, exhdrset->rsf)))
 			goto finish;
-		if((result = get_ExHeaderARM11SystemLocalInfo(&exhdrset->exHdr->arm11SystemLocalCapabilities, exhdrset->rsf))) 
+		if((result = get_ExHeaderARM11SystemLocalInfo(&exhdrset->exHdr->arm11SystemLocalCapabilities, exhdrset->rsf)))
 			goto finish;
 		if((result = get_ExHeaderARM11KernelInfo(&exhdrset->exHdr->arm11KernelCapabilities, exhdrset->rsf)))
 			goto finish;
-		if((result = get_ExHeaderARM9AccessControlInfo(&exhdrset->exHdr->arm9AccessControlInfo, exhdrset->rsf))) 
+		if((result = get_ExHeaderARM9AccessControlInfo(&exhdrset->exHdr->arm9AccessControlInfo, exhdrset->rsf)))
 			goto finish;
 	}
 	else{
-		if((result = get_ExHeaderCodeSetInfo(&exhdrset->exHdr->codeSetInfo, exhdrset->rsf))) 
+		if((result = get_ExHeaderCodeSetInfo(&exhdrset->exHdr->codeSetInfo, exhdrset->rsf)))
 			goto finish;
-		if((result = get_ExHeaderSystemInfo(&exhdrset->exHdr->systemInfo, exhdrset->rsf))) 
+		if((result = get_ExHeaderSystemInfo(&exhdrset->exHdr->systemInfo, exhdrset->rsf)))
 			goto finish;
-		if((result = get_ExHeaderARM11SystemLocalInfoLimited(&exhdrset->exHdr->arm11SystemLocalCapabilities, exhdrset->rsf))) 
+		if((result = get_ExHeaderARM11SystemLocalInfoLimited(&exhdrset->exHdr->arm11SystemLocalCapabilities, exhdrset->rsf)))
 			goto finish;
-		if((result = get_ExHeaderARM9AccessControlInfo(&exhdrset->exHdr->arm9AccessControlInfo, exhdrset->rsf))) 
+		if((result = get_ExHeaderARM9AccessControlInfo(&exhdrset->exHdr->arm9AccessControlInfo, exhdrset->rsf)))
 			goto finish;
 	}
 
@@ -196,13 +196,13 @@ int get_ExHeaderCodeSetInfo(exhdr_CodeSetInfo *CodeSetInfo, rsf_settings *rsf)
 		strncpy((char*)CodeSetInfo->name, rsf->BasicInfo.Title, 8);
 	else
 		strncpy((char*)CodeSetInfo->name, DEFAULT_EXHEADER_NAME, 8);
-	
+
 	/* Remaster Version */
 	if(rsf->SystemControlInfo.RemasterVersion)
 		u16_to_u8(CodeSetInfo->remasterVersion, strtol(rsf->SystemControlInfo.RemasterVersion,NULL,0), LE);
 	else
 		u16_to_u8(CodeSetInfo->remasterVersion, 0, LE);
-		
+
 	return 0;
 }
 
@@ -224,20 +224,20 @@ int get_ExHeaderSystemInfo(exhdr_SystemInfo *systemInfo, rsf_settings *rsf)
 	/* SaveDataSize */
 	if(rsf->SystemControlInfo.SaveDataSize){
 		u64 saveSize = 0;
-		if(GetSaveDataSizeFromString(&saveSize,rsf->SystemControlInfo.SaveDataSize,"EXHEADER")) 
+		if(GetSaveDataSizeFromString(&saveSize,rsf->SystemControlInfo.SaveDataSize,"EXHEADER"))
 			return EXHDR_BAD_RSF_OPT;
 		u64_to_u8(systemInfo->savedataSize, saveSize, LE);
 	}
 	else
 		u64_to_u8(systemInfo->savedataSize,0,LE);
-	
+
 	/* Jump Id */
 	if(rsf->SystemControlInfo.JumpId)
 		u64_to_u8(systemInfo->jumpId, strtoull(rsf->SystemControlInfo.JumpId,NULL,0), LE);
-	
+
 	else{
 		u64 jumpId = 0;
-		if(GetProgramID(&jumpId,rsf,false)) 
+		if(GetProgramID(&jumpId,rsf,false))
 			return EXHDR_BAD_RSF_OPT;
 		u64_to_u8(systemInfo->jumpId,jumpId,LE);
 	}
@@ -248,20 +248,20 @@ int get_ExHeaderARM11SystemLocalInfo(exhdr_ARM11SystemLocalCapabilities *arm11, 
 {
 	/* Program Id */
 	u64 programId = 0;
-	if(GetProgramID(&programId,rsf,true)) 
+	if(GetProgramID(&programId,rsf,true))
 		return EXHDR_BAD_RSF_OPT;
 	u64_to_u8(arm11->programId,programId,LE);
-	
+
 	/* Flags */
-	if(SetARM11SystemLocalInfoFlags(arm11, rsf)) 
+	if(SetARM11SystemLocalInfoFlags(arm11, rsf))
 		return EXHDR_BAD_RSF_OPT;
 
 	/* Resource Limit Descriptors */
-	if(SetARM11ResLimitDesc(arm11, rsf)) 
+	if(SetARM11ResLimitDesc(arm11, rsf))
 		return EXHDR_BAD_RSF_OPT;
 
 	/* Storage Info */
-	if(SetARM11StorageInfo(arm11, rsf)) 
+	if(SetARM11StorageInfo(arm11, rsf))
 		return EXHDR_BAD_RSF_OPT;
 
 	/* Service Access Control */
@@ -275,7 +275,7 @@ int get_ExHeaderARM11SystemLocalInfo(exhdr_ARM11SystemLocalCapabilities *arm11, 
 		else if(strcasecmp(rsf->AccessControlInfo.ResourceLimitCategory,"libapplet") == 0) arm11->resourceLimitCategory = resrc_limit_LIB_APPLET;
 		else if(strcasecmp(rsf->AccessControlInfo.ResourceLimitCategory,"other") == 0) arm11->resourceLimitCategory = resrc_limit_OTHER;
 	}
-	
+
 	/* Finish */
 	return 0;
 }
@@ -284,12 +284,12 @@ int get_ExHeaderARM11SystemLocalInfoLimited(exhdr_ARM11SystemLocalCapabilities *
 {
 	/* Program Id */
 	u64 programId = 0;
-	if(GetProgramID(&programId,rsf,true)) 
+	if(GetProgramID(&programId,rsf,true))
 		return EXHDR_BAD_RSF_OPT;
 	u64_to_u8(arm11->programId,programId,LE);
 
 	/* Storage Info */
-	if(SetARM11StorageInfo(arm11, rsf)) 
+	if(SetARM11StorageInfo(arm11, rsf))
 		return EXHDR_BAD_RSF_OPT;
 
 	/* Finish */
@@ -336,12 +336,12 @@ int SetARM11SystemLocalInfoFlags(exhdr_ARM11SystemLocalCapabilities *arm11, rsf_
 			arm11->systemModeExt = sysmode_ext_124MB;
 		else if (strcasecmp(rsf->AccessControlInfo.SystemModeExt, "178MB") == 0)
 			arm11->systemModeExt = sysmode_ext_178MB;
-		
+
 		else {
 			fprintf(stderr, "[EXHEADER ERROR] Unexpected SystemModeExt: %s\n", rsf->AccessControlInfo.SystemModeExt);
 			return EXHDR_BAD_RSF_OPT;
 		}
-	} 
+	}
 
 	/* flag[2] */
 	if(rsf->AccessControlInfo.AffinityMask){
@@ -397,11 +397,11 @@ int SetARM11SystemLocalInfoFlags(exhdr_ARM11SystemLocalCapabilities *arm11, rsf_
 }
 
 int GetAppType(rsf_settings *rsf)
-{	
+{
 	if(rsf->SystemControlInfo.AppType){
-		if(strcasecmp(rsf->SystemControlInfo.AppType,"application") == 0) 
+		if(strcasecmp(rsf->SystemControlInfo.AppType,"application") == 0)
 			return processtype_APPLICATION;
-		else if(strcasecmp(rsf->SystemControlInfo.AppType,"system") == 0) 
+		else if(strcasecmp(rsf->SystemControlInfo.AppType,"system") == 0)
 			return processtype_SYSTEM;
 	}
 	return processtype_APPLICATION;
@@ -418,7 +418,7 @@ int SetARM11ResLimitDesc(exhdr_ARM11SystemLocalCapabilities *arm11, rsf_settings
 			}
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -438,10 +438,10 @@ int SetARM11StorageInfo(exhdr_ARM11SystemLocalCapabilities *arm11, rsf_settings 
 	}
 
 	/* System Savedata Id */
-	SetARM11StorageInfoSystemSaveDataId(arm11,rsf);	
+	SetARM11StorageInfoSystemSaveDataId(arm11,rsf);
 
 	/* FileSystem Access Info */
-	return SetARM11StorageInfoFsAccessInfo(arm11,rsf);		
+	return SetARM11StorageInfoFsAccessInfo(arm11,rsf);
 }
 
 int SetARM11StorageInfoFsAccessInfo(exhdr_ARM11SystemLocalCapabilities *arm11, rsf_settings *rsf)
@@ -498,7 +498,7 @@ int SetARM11StorageInfoFsAccessInfo(exhdr_ARM11SystemLocalCapabilities *arm11, r
 		}
 	}
 	u32_to_u8(arm11->storageInfo.accessInfo,accessInfo,LE);
-	
+
 	return 0;
 }
 
@@ -506,7 +506,7 @@ void SetARM11StorageInfoSystemSaveDataId(exhdr_ARM11SystemLocalCapabilities *arm
 {
 	if(rsf->AccessControlInfo.SystemSaveDataId1)
 		u32_to_u8(arm11->storageInfo.systemSavedataId[0], strtoul(rsf->AccessControlInfo.SystemSaveDataId1,NULL,0), LE);
-	
+
 	if(rsf->AccessControlInfo.SystemSaveDataId2)
 		u32_to_u8(arm11->storageInfo.systemSavedataId[1], strtoul(rsf->AccessControlInfo.SystemSaveDataId2,NULL,0), LE);
 }
@@ -519,12 +519,12 @@ void SetARM11StorageInfoExtSaveDataId(exhdr_ARM11SystemLocalCapabilities *arm11,
 		else
 			u32_to_u8(arm11->storageInfo.extSavedataId, GetTidUniqueId(u8_to_u64(arm11->programId,LE)), LE);
 	}
-	
+
 }
 
 void SetARM11StorageInfoOtherUserSaveData(exhdr_ARM11SystemLocalCapabilities *arm11, rsf_settings *rsf)
 {
-	u64 value = 0; 
+	u64 value = 0;
 	if(rsf->AccessControlInfo.OtherUserSaveDataId1)
 		value = 0xffffff & strtoul(rsf->AccessControlInfo.OtherUserSaveDataId1,NULL,0);
 	value = value << 20;
@@ -537,7 +537,7 @@ void SetARM11StorageInfoOtherUserSaveData(exhdr_ARM11SystemLocalCapabilities *ar
 	/* UseOtherVariationSaveData Flag */
 	if(rsf->AccessControlInfo.UseOtherVariationSaveData)
 		value |= 0x1000000000000000;
-	
+
 	u64_to_u8(arm11->storageInfo.storageAccessableUniqueIds,value,LE);
 }
 
@@ -647,13 +647,13 @@ int get_ExHeaderARM11KernelInfo(exhdr_ARM11KernelCapabilities *arm11, rsf_settin
 	totalDesc = 0;
 	for(int i = 0; i < 6; i++)
 		totalDesc += desc[i].num;
-		
+
 	if(totalDesc >= 28){
 		fprintf(stderr,"[EXHEADER ERROR] Too many Kernel Capabilities.\n");
 		result = EXHDR_BAD_RSF_OPT;
 		goto finish;
 	}
-	
+
 	descIndex = 0;
 	for(int i = 0; i < 6; i++){
 		for(int j = 0; j < desc[i].num; j++){
@@ -662,7 +662,7 @@ int get_ExHeaderARM11KernelInfo(exhdr_ARM11KernelCapabilities *arm11, rsf_settin
 		}
 	}
 
-	/* Fill Remaining Descriptors with 0xffffffff */ 
+	/* Fill Remaining Descriptors with 0xffffffff */
 	for(int i = descIndex; i < 28; i++)
 		u32_to_u8(arm11->descriptors[i],0xffffffff,LE);
 
@@ -692,9 +692,9 @@ int SetARM11KernelDescSysCallControl(ARM11KernelCapabilityDescriptor *desc, rsf_
 	// Count Active Syscall Descs
 	activeSysCallDesc = 0;
 	for(int i = 0; i < 8; i++)
-		if((tmp.data[i] & 0x00ffffff) != 0) 
+		if((tmp.data[i] & 0x00ffffff) != 0)
 			activeSysCallDesc++;
-	
+
 	// Transfer Active Syscall Descs to out Descriptor
 	AllocateARM11KernelDescMemory(desc,activeSysCallDesc);
 	sysCallDescPos = 0;
@@ -744,15 +744,15 @@ void DisableSystemCall(ARM11KernelCapabilityDescriptor *desc, int sysCall)
 }
 
 int SetARM11KernelDescInteruptNumList(ARM11KernelCapabilityDescriptor *desc, rsf_settings *rsf)
-{	
+{
 	int ret = 0;
 	u16 activeInteruptDesc, interuptDescPos;
-	
+
 	// Create Temporary Descriptor
 	ARM11KernelCapabilityDescriptor tmp;
 	memset(&tmp,0,sizeof(ARM11KernelCapabilityDescriptor));
 
-	AllocateARM11KernelDescMemory(&tmp,8);
+	AllocateARM11KernelDescMemory(&tmp, 80/4);
 
 	// Get Interupts
 	ret = GetARM11Interupts(&tmp,rsf);
@@ -760,14 +760,14 @@ int SetARM11KernelDescInteruptNumList(ARM11KernelCapabilityDescriptor *desc, rsf
 
 	// Count Active Interupt Descs
 	activeInteruptDesc = 0;
-	for(int i = 0; i < 8; i++)
-		if(tmp.data[i]) 
+	for(int i = 0; i < 80/4; i++)
+		if(tmp.data[i])
 			activeInteruptDesc++;
-	
+
 	// Transfer Active Interupt Descs to output Descriptor
 	AllocateARM11KernelDescMemory(desc,activeInteruptDesc);
 	interuptDescPos = 0;
-	for(int i = 0; i < 8; i++){
+	for(int i = 0; i < 80/4; i++){
 		if(tmp.data[i]) {
 			SetARM11KernelDescValue(desc,interuptDescPos,(tmp.data[i] & 0x0fffffff) | desc_InteruptNumList);
 			interuptDescPos++;
@@ -784,9 +784,10 @@ int GetARM11Interupts(ARM11KernelCapabilityDescriptor *desc, rsf_settings *rsf)
 {
 	if(!rsf->AccessControlInfo.InterruptNumbers)
 		return 0;
-	
-	if(rsf->AccessControlInfo.InterruptNumbersNum > 32){
-		fprintf(stderr,"[EXHEADER ERROR] Too many Interupts. Maximum is 32\n");
+
+	if(rsf->AccessControlInfo.InterruptNumbersNum > 80){
+		// There are between 80 and 88 valid PPIs on 3DS, and a dozen of them are reserved by kernel (CDMA)
+		fprintf(stderr,"[EXHEADER ERROR] Too many Interupts. Maximum is 80\n");
 		return EXHDR_BAD_RSF_OPT;
 	}
 	for(int i = 0; i < rsf->AccessControlInfo.InterruptNumbersNum; i++){
@@ -813,7 +814,7 @@ int SetARM11KernelDescAddressMapping(ARM11KernelCapabilityDescriptor *desc, rsf_
 {
 	int ret = 0;
 	u16 memMapDescPos;
-	
+
 	// Create Temporary Descriptors
 	ARM11KernelCapabilityDescriptor io_tmp;
 	clrmem(&io_tmp,sizeof(ARM11KernelCapabilityDescriptor));
@@ -851,10 +852,10 @@ int GetARM11IOMappings(ARM11KernelCapabilityDescriptor *desc, rsf_settings *rsf)
 {
 	if(!rsf->AccessControlInfo.IORegisterMapping)
 		return 0;
-		
+
 	AllocateARM11KernelDescMemory(desc,rsf->AccessControlInfo.IORegisterMappingNum*2);
 	u16 descUsed = 0;
-	
+
 	for(int i = 0; i < rsf->AccessControlInfo.IORegisterMappingNum; i++){
 		if(strlen(rsf->AccessControlInfo.IORegisterMapping[i])){
 			// Parse Address String
@@ -863,7 +864,7 @@ int GetARM11IOMappings(ARM11KernelCapabilityDescriptor *desc, rsf_settings *rsf)
 			if(AddressEndStr){
 				if(strlen(AddressEndStr) > 1) // if not just '-'
 					AddressEndStr = (AddressEndStr+1); // Setting the str to the expected start of address string
-				else 
+				else
 					AddressEndStr = NULL;
 			}
 
@@ -916,7 +917,7 @@ int GetARM11StaticMappings(ARM11KernelCapabilityDescriptor *desc, rsf_settings *
 			char *AddressStartStr = rsf->AccessControlInfo.MemoryMapping[i];
 			char *AddressEndStr = strstr(AddressStartStr,"-");
 			char *ROFlagStr = strstr(AddressStartStr,":");
-			bool IsRO = false; 
+			bool IsRO = false;
 			if(ROFlagStr)
 				IsRO = strcasecmp(ROFlagStr,":r") == 0 ? true : false;
 
@@ -926,7 +927,7 @@ int GetARM11StaticMappings(ARM11KernelCapabilityDescriptor *desc, rsf_settings *
 					if(AddressEndStr == ROFlagStr)
 						AddressEndStr = NULL;
 				}
-				else 
+				else
 					AddressEndStr = NULL;
 			}
 			u32 AddressStart = strtoul(AddressStartStr,NULL,16);
@@ -1000,8 +1001,8 @@ u32 GetMappingDesc(u32 address, u32 prefixVal, s32 numPrefixBits, bool IsRO)
 int SetARM11KernelDescOtherCapabilities(ARM11KernelCapabilityDescriptor *desc, rsf_settings *rsf)
 {
 	u32 otherCapabilities = 0;
-	u32 memType = 0; 
-	
+	u32 memType = 0;
+
 	if(!rsf->AccessControlInfo.DisableDebug)
 		otherCapabilities |= othcap_PERMIT_DEBUG;
 	if(rsf->AccessControlInfo.EnableForceDebug)
@@ -1060,7 +1061,7 @@ int SetARM11KernelDescHandleTableSize(ARM11KernelCapabilityDescriptor *desc, rsf
 	else{
 		ErrorParamNotFound("AccessControlInfo/HandleTableSize");
 		return EXHDR_BAD_RSF_OPT;
-	}	
+	}
 	return 0;
 }
 
@@ -1082,7 +1083,7 @@ int SetARM11KernelDescReleaseKernelVersion(ARM11KernelCapabilityDescriptor *desc
 void SetARM11KernelDescValue(ARM11KernelCapabilityDescriptor *desc, u16 index, u32 value)
 {
 	if(index >= desc->num) return;
-	desc->data[index] |= value; 
+	desc->data[index] |= value;
 }
 
 void SetARM11KernelDescBitmask(ARM11KernelCapabilityDescriptor *desc, u32 bitmask)
@@ -1135,7 +1136,7 @@ int get_ExHeaderARM9AccessControlInfo(exhdr_ARM9AccessControlInfo *arm9, rsf_set
 			return EXHDR_BAD_RSF_OPT;
 		}
 	}
-	
+
 	for(int i = 0; i < rsf->AccessControlInfo.FileSystemAccessNum; i++){
 		if(strcmp(rsf->AccessControlInfo.FileSystemAccess[i],"DirectSdmc") == 0)
 			arm9AccessControl |= arm9cap_USE_DIRECT_SDMC;
@@ -1209,7 +1210,7 @@ int GetDependencyList_frm_exhdr(u8 *Dest, extended_hdr *hdr)
 {
 	if(!Dest) return -1;
 	memcpy(Dest,hdr->dependencyList,0x30*8);
-	
+
 	return 0;
 }
 
@@ -1260,7 +1261,7 @@ int GetSaveDataSizeFromString(u64 *out, char *string, char *moduleName)
 }
 
 int GetSaveDataSize_rsf(u64 *SaveDataSize, user_settings *usrset)
-{	
+{
 
 	if(usrset->common.rsfSet.SystemControlInfo.SaveDataSize){
 		*SaveDataSize = strtoull(usrset->common.rsfSet.SystemControlInfo.SaveDataSize,NULL,10);
