@@ -24,7 +24,6 @@ typedef enum
 	PROGRAM_ID_CATEGORY_FLAG_CAN_SKIP_CONVERT_JUMP_ID       = 0x00100,
 	PROGRAM_ID_CATEGORY_FLAG_TWL                            = 0x08000,
 	PROGRAM_ID_CATEGORY_FLAG_MANUAL                         = 0x10000,
-	PROGRAM_ID_CATEGORY_FLAG_CUP_UPDATE                     = 0x20000,
 } ProgramIdCategoryFlag;
 
 typedef enum
