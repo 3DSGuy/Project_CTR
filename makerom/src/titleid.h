@@ -10,19 +10,21 @@ typedef enum
 
 typedef enum
 {
-	PROGRAM_ID_CATEGORY_FLAG_NORMAL                         = 0x0000,     
-	PROGRAM_ID_CATEGORY_FLAG_DLP_CHILD                      = 0x0001,      
-	PROGRAM_ID_CATEGORY_FLAG_DEMO                           = 0x0002,        
-	PROGRAM_ID_CATEGORY_FLAG_CONTENTS                       = 0x0003,        
-	PROGRAM_ID_CATEGORY_FLAG_ADD_ON_CONTENTS                = 0x0004, 
-	PROGRAM_ID_CATEGORY_FLAG_PATCH                          = 0x0006, 
-	PROGRAM_ID_CATEGORY_FLAG_CANNOT_EXECUTION               = 0x0008, 
-	PROGRAM_ID_CATEGORY_FLAG_SYSTEM                         = 0x0010, 
-	PROGRAM_ID_CATEGORY_FLAG_REQUIRE_BATCH_UPDATE           = 0x0020, 
-	PROGRAM_ID_CATEGORY_FLAG_NOT_REQUIRE_USER_APPROVAL      = 0x0040, 
-	PROGRAM_ID_CATEGORY_FLAG_NOT_REQUIRE_RIGHT_FOR_MOUNT    = 0x0080, 
-	PROGRAM_ID_CATEGORY_FLAG_CAN_SKIP_CONVERT_JUMP_ID       = 0x0100,
-	PROGRAM_ID_CATEGORY_FLAG_TWL                            = 0x8000,
+	PROGRAM_ID_CATEGORY_FLAG_NORMAL                         = 0x00000,
+	PROGRAM_ID_CATEGORY_FLAG_DLP_CHILD                      = 0x00001,
+	PROGRAM_ID_CATEGORY_FLAG_DEMO                           = 0x00002,
+	PROGRAM_ID_CATEGORY_FLAG_CONTENTS                       = 0x00003,
+	PROGRAM_ID_CATEGORY_FLAG_ADD_ON_CONTENTS                = 0x00004,
+	PROGRAM_ID_CATEGORY_FLAG_PATCH                          = 0x00006,
+	PROGRAM_ID_CATEGORY_FLAG_CANNOT_EXECUTION               = 0x00008,
+	PROGRAM_ID_CATEGORY_FLAG_SYSTEM                         = 0x00010,
+	PROGRAM_ID_CATEGORY_FLAG_REQUIRE_BATCH_UPDATE           = 0x00020,
+	PROGRAM_ID_CATEGORY_FLAG_NOT_REQUIRE_USER_APPROVAL      = 0x00040,
+	PROGRAM_ID_CATEGORY_FLAG_NOT_REQUIRE_RIGHT_FOR_MOUNT    = 0x00080,
+	PROGRAM_ID_CATEGORY_FLAG_CAN_SKIP_CONVERT_JUMP_ID       = 0x00100,
+	PROGRAM_ID_CATEGORY_FLAG_TWL                            = 0x08000,
+	PROGRAM_ID_CATEGORY_FLAG_MANUAL                         = 0x10000,
+	PROGRAM_ID_CATEGORY_FLAG_CUP_UPDATE                     = 0x20000,
 } ProgramIdCategoryFlag;
 
 typedef enum
@@ -81,6 +83,8 @@ typedef enum
 												| PROGRAM_ID_CATEGORY_FLAG_NOT_REQUIRE_USER_APPROVAL
 												| PROGRAM_ID_CATEGORY_FLAG_NOT_REQUIRE_RIGHT_FOR_MOUNT ),
 
+	PROGRAM_ID_CATEGORY_MANUAL              = ( PROGRAM_ID_CATEGORY_FLAG_MANUAL ),
+
 } ProgramIdCategory;
 
 u64 ConvertTwlIdToCtrId(u64 pgid);
@@ -88,12 +92,13 @@ u64 ConvertTwlIdToCtrId(u64 pgid);
 int GetProgramID(u64 *dest, rsf_settings *rsf, bool IsForExheader);
 int GetUniqueID(u32 *dest, rsf_settings *rsf);
 
-u16 GetTidCategory(u64 titleId);
+u32 GetTidCategory(u64 titleId);
 u32 GetTidUniqueId(u64 titleId);
 
-bool IsDemo(u16 Category);
-bool IsSystem(u16 Category);
-bool IsDlpChild(u16 Category);
-bool IsPatch(u16 Category);
-bool IsContents(u16 Category);
-bool IsAddOnContent(u16 Category);
+bool IsDemo(u32 Category);
+bool IsSystem(u32 Category);
+bool IsDlpChild(u32 Category);
+bool IsPatch(u32 Category);
+bool IsContents(u32 Category);
+bool IsAddOnContent(u32 Category);
+bool IsManual(u32 Category);

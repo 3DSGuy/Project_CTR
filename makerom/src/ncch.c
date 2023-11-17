@@ -678,7 +678,7 @@ int SetCommonHeaderBasicData(ncch_settings *set, ncch_hdr *hdr)
 	int result = GetProgramID(&programId,set->rsfSet,false); 
 	if(result) return result;
 
-	u64_to_u8(hdr->programId,programId,LE);
+	u64_to_u8(hdr->programId,programId & 0x0004FFFFFFFFFFFF,LE);
 	u64_to_u8(hdr->titleId,programId,LE);
 
 	/* Get Product Code and Maker Code */
@@ -742,29 +742,24 @@ int SetCommonHeaderBasicData(ncch_settings *set, ncch_hdr *hdr)
 
 
 	/* Setting FormType */
-	hdr->flags[ncchflag_CONTENT_TYPE] = form_Unassigned;
-	if(set->options.IsCfa)
-		hdr->flags[ncchflag_CONTENT_TYPE] = form_SimpleContent;
-	else if (set->options.UseRomFS)
-		hdr->flags[ncchflag_CONTENT_TYPE] = form_Executable;
-	else
-		hdr->flags[ncchflag_CONTENT_TYPE] = form_ExecutableWithoutRomfs;
+	hdr->flags[ncchflag_CONTENT_TYPE] = set->options.UseRomFS ? content_HasRomFS : content_None;
+	if(!set->options.IsCfa) hdr->flags[ncchflag_CONTENT_TYPE] |= content_Application;
 	
 	/* Setting ContentType */
 	if(set->rsfSet->BasicInfo.ContentType){
-		if(strcmp(set->rsfSet->BasicInfo.ContentType,"Application") == 0) hdr->flags[ncchflag_CONTENT_TYPE] |= (content_Application << 2);
-		else if(strcmp(set->rsfSet->BasicInfo.ContentType,"SystemUpdate") == 0) hdr->flags[ncchflag_CONTENT_TYPE] |= (content_SystemUpdate << 2);
-		else if(strcmp(set->rsfSet->BasicInfo.ContentType,"Manual") == 0) hdr->flags[ncchflag_CONTENT_TYPE] |= (content_Manual << 2);
-		else if(strcmp(set->rsfSet->BasicInfo.ContentType,"Child") == 0) hdr->flags[ncchflag_CONTENT_TYPE] |= (content_Child << 2);
-		else if(strcmp(set->rsfSet->BasicInfo.ContentType,"Trial") == 0) hdr->flags[ncchflag_CONTENT_TYPE] |= (content_Trial << 2);
-		else if (strcmp(set->rsfSet->BasicInfo.ContentType, "ExtendedSystemUpdate") == 0) hdr->flags[ncchflag_CONTENT_TYPE] |= (content_ExtendedSystemUpdate << 2);
+		if(strcmp(set->rsfSet->BasicInfo.ContentType,"Application") == 0) hdr->flags[ncchflag_CONTENT_TYPE] |= content_Application;
+		else if(strcmp(set->rsfSet->BasicInfo.ContentType,"SystemUpdate") == 0) hdr->flags[ncchflag_CONTENT_TYPE] |= content_SystemUpdate;
+		else if(strcmp(set->rsfSet->BasicInfo.ContentType,"Manual") == 0) hdr->flags[ncchflag_CONTENT_TYPE] |= content_Manual;
+		else if(strcmp(set->rsfSet->BasicInfo.ContentType,"Child") == 0) hdr->flags[ncchflag_CONTENT_TYPE] |= content_Child;
+		else if(strcmp(set->rsfSet->BasicInfo.ContentType,"Trial") == 0) hdr->flags[ncchflag_CONTENT_TYPE] |= content_Trial;
+		else if (strcmp(set->rsfSet->BasicInfo.ContentType, "ExtendedSystemUpdate") == 0) hdr->flags[ncchflag_CONTENT_TYPE] |= content_ExtendedSystemUpdate;
 		else{
 			fprintf(stderr,"[NCCH ERROR] Invalid ContentType '%s'\n",set->rsfSet->BasicInfo.ContentType);
 			return NCCH_BAD_RSF_SET;
 		}
 	}
 	else 
-		hdr->flags[ncchflag_CONTENT_TYPE] |= (content_Application << 2);
+		hdr->flags[ncchflag_CONTENT_TYPE] |= content_Application;
 
 	return 0;
 }
@@ -871,7 +866,6 @@ int VerifyNcch(u8 *ncch, keys_struct *keys, bool CheckHash, bool SuppressOutput)
 			free(exHdr);
 			return EXHDR_CORRUPT;
 		}
-		free(exHdr);
 		
 		// Checking RSA Sigs
 		access_descriptor *acexDesc = malloc(ncchInfo->acexSize);
@@ -881,6 +875,7 @@ int VerifyNcch(u8 *ncch, keys_struct *keys, bool CheckHash, bool SuppressOutput)
 			free(exHdr);
 			return MEM_ERROR; 
 		}
+		free(exHdr);
 		memcpy(acexDesc,ncch+ncchInfo->acexOffset,ncchInfo->acexSize);
 		if(IsNcchEncrypted(hdr))
 			CryptNcchRegion((u8*)acexDesc,ncchInfo->acexSize,ncchInfo->exhdrSize,ncchInfo->titleId,keys->aes.ncchKey0,ncch_exhdr);
@@ -1076,12 +1071,12 @@ bool IsNcch(FILE *fp, u8 *buf)
 
 bool IsCfa(ncch_hdr* hdr)
 {
-	return (hdr->flags[ncchflag_CONTENT_TYPE] & 3) == form_SimpleContent;
+	return !(hdr->flags[ncchflag_CONTENT_TYPE] & 3);
 }
 
 bool IsUpdateCfa(ncch_hdr* hdr)
 {
-	return (hdr->flags[ncchflag_CONTENT_TYPE] >> 2) == content_SystemUpdate || (hdr->flags[ncchflag_CONTENT_TYPE] >> 2) == content_ExtendedSystemUpdate;
+	return (hdr->flags[ncchflag_CONTENT_TYPE] & content_SystemUpdate) || (hdr->flags[ncchflag_CONTENT_TYPE] & content_ExtendedSystemUpdate);
 }
 
 u32 GetNcchBlockSize(ncch_hdr* hdr)

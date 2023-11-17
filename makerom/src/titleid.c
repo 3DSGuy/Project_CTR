@@ -2,24 +2,24 @@
 #include "ncch_read.h"
 #include "titleid.h"
 
-const u16 DEFAULT_CATEGORY = PROGRAM_ID_CATEGORY_APPLICATION;
+const u32 DEFAULT_CATEGORY = PROGRAM_ID_CATEGORY_APPLICATION;
 const u32 DEFAULT_UNIQUE_ID = 0xff3ff;
 
-void SetPIDType(u16 *type);
-int SetPIDCategoryFromName(u16 *cat, char *CategoryStr);
-int SetPIDCategoryFromFlags(u16 *cat, char **CategoryFlags, u32 FlagNum);
-int SetPIDCategoryFromFlag(u16 *cat, u16 flag, char *flagName);
+void SetPIDType(u32 *type);
+int SetPIDCategoryFromName(u32 *cat, char *CategoryStr);
+int SetPIDCategoryFromFlags(u32 *cat, char **CategoryFlags, u32 FlagNum);
+int SetPIDCategoryFromFlag(u32 *cat, u32 flag, char *flagName);
 u32 SetPIDUniqueId(char *UniqueIdStr);
-int SetTitleVariation(u8 *var, u16 cat, rsf_settings *rsf);
+int SetTitleVariation(u8 *var, u32 cat, rsf_settings *rsf);
 
 u64 ConvertTwlIdToCtrId(u64 pgid)
 {
 	return 0x0004800000000000 | (pgid & 0x00007FFFFFFFFFFF);
 }
 
-u16 GetTidCategory(u64 titleId)
+u32 GetTidCategory(u64 titleId)
 {
-	return (titleId>>32) & MAX_U16; 
+	return (titleId>>32) & 0x3FFFF; 
 }
 
 u32 GetTidUniqueId(u64 titleId)
@@ -31,7 +31,7 @@ int GetProgramID(u64 *dest, rsf_settings *rsf, bool IsForExheader)
 {
 	int ret = 0;
 	u32 uniqueId;
-	u16 type,category;
+	u32 type,category;
 	u8 variation;
 
 	if(rsf->TitleInfo.Category && rsf->TitleInfo.CategoryFlags){
@@ -81,9 +81,9 @@ int GetProgramID(u64 *dest, rsf_settings *rsf, bool IsForExheader)
 	return 0;
 }
 
-void SetPIDType(u16 *type)
+void SetPIDType(u32 *type)
 {
-	*type = 0x0004;
+	*type = 0x00004;
 }
 
 int GetUniqueID(u32 *uid, rsf_settings *rsf)
@@ -96,7 +96,7 @@ int GetUniqueID(u32 *uid, rsf_settings *rsf)
 	return 0;
 }
 
-int SetPIDCategoryFromName(u16 *cat, char *CategoryStr)
+int SetPIDCategoryFromName(u32 *cat, char *CategoryStr)
 {
 	if(strcmp(CategoryStr,"Application") == 0) *cat = PROGRAM_ID_CATEGORY_APPLICATION;
 	else if(strcmp(CategoryStr,"SystemApplication") == 0) *cat = PROGRAM_ID_CATEGORY_SYSTEM_APPLICATION;
@@ -111,6 +111,7 @@ int SetPIDCategoryFromName(u16 *cat, char *CategoryStr)
 	else if(strcmp(CategoryStr,"AddOnContents") == 0) *cat = PROGRAM_ID_CATEGORY_ADD_ON_CONTENTS;
 	else if(strcmp(CategoryStr,"Patch") == 0) *cat = PROGRAM_ID_CATEGORY_PATCH;
 	else if(strcmp(CategoryStr,"AutoUpdateContents") == 0) *cat = PROGRAM_ID_CATEGORY_AUTO_UPDATE_CONTENT;
+	else if(strcmp(CategoryStr,"Manual") == 0) *cat = PROGRAM_ID_CATEGORY_MANUAL;
 	else {
 		fprintf(stderr,"[ID ERROR] Invalid Category: \"%s\"\n",CategoryStr);
 		return PID_INVALID_CATEGORY;
@@ -119,7 +120,7 @@ int SetPIDCategoryFromName(u16 *cat, char *CategoryStr)
 	return 0;
 }
 
-int SetPIDCategoryFromFlags(u16 *cat, char **CategoryFlags, u32 FlagNum)
+int SetPIDCategoryFromFlags(u32 *cat, char **CategoryFlags, u32 FlagNum)
 {
 	int ret = 0;
 	for(u32 i = 0; i < FlagNum; i++){
@@ -147,8 +148,8 @@ int SetPIDCategoryFromFlags(u16 *cat, char **CategoryFlags, u32 FlagNum)
 			ret = SetPIDCategoryFromFlag(cat,PROGRAM_ID_CATEGORY_FLAG_NOT_REQUIRE_RIGHT_FOR_MOUNT,"NotRequireRightForMount");
 		else if(strcmp(CategoryFlags[i],"CanSkipConvertJumpId") == 0)
 			ret = SetPIDCategoryFromFlag(cat,PROGRAM_ID_CATEGORY_FLAG_CAN_SKIP_CONVERT_JUMP_ID,"CanSkipConvertJumpId");
-		
-
+		else if(strcmp(CategoryFlags[i],"Manual") == 0)
+			ret = SetPIDCategoryFromFlag(cat,PROGRAM_ID_CATEGORY_FLAG_MANUAL,"Manual");
 		else {
 			fprintf(stderr,"[ID ERROR] Invalid CategoryFlag: \"%s\"\n",CategoryFlags[i]);
 			return PID_INVALID_CATEGORY;
@@ -157,7 +158,7 @@ int SetPIDCategoryFromFlags(u16 *cat, char **CategoryFlags, u32 FlagNum)
 	return ret;
 }
 
-int SetPIDCategoryFromFlag(u16 *cat, u16 flag, char *flagName)
+int SetPIDCategoryFromFlag(u32 *cat, u32 flag, char *flagName)
 {
 	if(!flag) return 0;
 	if((*cat & flag) == flag){
@@ -174,7 +175,7 @@ u32 SetPIDUniqueId(char *UniqueIdStr)
 	return 0xffffff & strtoull(UniqueIdStr,NULL,0);
 }
 
-int SetTitleVariation(u8 *var, u16 cat, rsf_settings *rsf)
+int SetTitleVariation(u8 *var, u32 cat, rsf_settings *rsf)
 {
 	if(IsDemo(cat)){
 		if(rsf->TitleInfo.DemoIndex){
@@ -218,32 +219,37 @@ int SetTitleVariation(u8 *var, u16 cat, rsf_settings *rsf)
 	return 0;
 }
 
-bool IsDemo(u16 Category)
+bool IsDemo(u32 Category)
 {
-	return Category == PROGRAM_ID_CATEGORY_DEMO;
+	return Category & PROGRAM_ID_CATEGORY_DEMO;
 }
 
-bool IsSystem(u16 Category)
+bool IsSystem(u32 Category)
 {
-	return (Category & PROGRAM_ID_CATEGORY_FLAG_SYSTEM) == PROGRAM_ID_CATEGORY_FLAG_SYSTEM;
+	return Category & PROGRAM_ID_CATEGORY_FLAG_SYSTEM;
 }
 
-bool IsDlpChild(u16 Category)
+bool IsDlpChild(u32 Category)
 {
-	return Category == PROGRAM_ID_CATEGORY_DLP_CHILD;
+	return Category & PROGRAM_ID_CATEGORY_DLP_CHILD;
 }
 
-bool IsPatch(u16 Category)
+bool IsPatch(u32 Category)
 {
 	return Category == PROGRAM_ID_CATEGORY_PATCH;
 }
 
-bool IsContents(u16 Category)
+bool IsContents(u32 Category)
 {
 	return (Category & PROGRAM_ID_CATEGORY_FLAG_CONTENTS) == PROGRAM_ID_CATEGORY_FLAG_CONTENTS;
 }
 
-bool IsAddOnContent(u16 Category)
+bool IsAddOnContent(u32 Category)
 {
 	return Category == PROGRAM_ID_CATEGORY_ADD_ON_CONTENTS;
+}
+
+bool IsManual(u32 Category)
+{
+	return Category & PROGRAM_ID_CATEGORY_MANUAL;
 }

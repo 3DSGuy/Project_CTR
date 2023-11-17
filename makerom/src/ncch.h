@@ -50,21 +50,15 @@ typedef enum
 
 typedef enum
 {
-	form_Unassigned,
-	form_SimpleContent,
-	form_ExecutableWithoutRomfs,
-	form_Executable
-} ncch_form_type;
-
-typedef enum
-{
-	content_Application,
-	content_SystemUpdate,
-	content_Manual,
-	content_Child,
-	content_Trial,
-	content_ExtendedSystemUpdate
-} ncch_content_bitmask;
+	content_None = 0,
+	content_HasRomFS = 1,
+	content_Application = 2,
+	content_SystemUpdate = 4,
+	content_Manual = 8,
+	content_Child = 16,
+	content_Trial = 32,
+	content_ExtendedSystemUpdate = 64,
+} ncch_flag_content_type;
 
 typedef enum
 {
