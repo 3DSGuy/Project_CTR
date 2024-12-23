@@ -143,8 +143,13 @@ void ctrtool::NcchProcess::importHeader()
 
 	}
 
-
-	if (mHeader.header.exhdr_size.unwrap() != 0 && mHeader.header.exhdr_size.unwrap() != sizeof(ntd::n3ds::ExtendedHeader))
+	// SDK 0.9.x (and before?) CXIs have the exheader size set to zero, even with an exheader present.
+	// SDK 0.10 CXIs use the full exheader size of 0x800 in the NCCH header.
+	// Either SDK 0.10.1 or 0.10.2 start to allow exheader size of 0x400, although 0x800 is still accepted.
+	// The NCCH format version remained v1 until SDK 0.11 or later.
+	// Therefore, for NCCH format version v1 (prototype) only, a size of 0x800 must also be accepted, alongside zero and 0x400.
+	bool is_proto_exhdr_size = mHeader.header.format_version.unwrap() == ntd::n3ds::NcchCommonHeader::FormatVersion_CXI_PROTOTYPE && mHeader.header.exhdr_size.unwrap() == (sizeof(ntd::n3ds::ExtendedHeader) + sizeof(ntd::n3ds::AccessDescriptor));
+	if (mHeader.header.exhdr_size.unwrap() != 0 && mHeader.header.exhdr_size.unwrap() != sizeof(ntd::n3ds::ExtendedHeader) && !is_proto_exhdr_size)
 	{
 		throw tc::InvalidOperationException(mModuleLabel, fmt::format("NcchHeader has invalid ExHeader size. (0x{:02x})", mHeader.header.exhdr_size.unwrap()));
 	}
