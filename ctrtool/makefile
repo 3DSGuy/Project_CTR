@@ -165,7 +165,7 @@ shared_lib: $(SRC_OBJ) create_binary_dir
 # Build Program
 program: $(SRC_OBJ) create_binary_dir
 	@echo LINK $(PROJECT_BIN_PATH)/$(PROJECT_NAME)
-	@$(CXX) $(ARCHFLAGS) $(SRC_OBJ) $(LIB) -o "$(PROJECT_BIN_PATH)/$(PROJECT_NAME)"
+	@$(CXX) $(LDFLAGS) $(ARCHFLAGS) $(SRC_OBJ) $(LIB) -o "$(PROJECT_BIN_PATH)/$(PROJECT_NAME)"
 
 # Build Test Program
 test_program: $(TESTSRC_OBJ) $(SRC_OBJ) create_binary_dir
