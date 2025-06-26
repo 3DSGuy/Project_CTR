@@ -448,6 +448,7 @@ void ctrtool::SettingsInitializer::parse_args(const std::vector<std::string>& ar
 	// rom options
 	opts.registerOptionHandler(std::shared_ptr<SingleParamSizetOptionHandler>(new SingleParamSizetOptionHandler(rom.content_process_index, {"-n", "--ncch", "--cidx"})));
 	opts.registerOptionHandler(std::shared_ptr<SingleParamPathOptionHandler>(new SingleParamPathOptionHandler(rom.content_extract_path, {"--contents"})));
+	opts.registerOptionHandler(std::shared_ptr<FlagOptionHandler>(new FlagOptionHandler(rom.decrypt_ncch, { "--decrypt" })));
 
 
 	// ncch options
@@ -631,6 +632,7 @@ void ctrtool::SettingsInitializer::usage_text()
 		"CCI options:\n"
 		"  -n, --ncch=index   Specify NCCH partition index.\n"
 		"  --contents=dir     Specify Contents directory path.\n"
+		"  --decrypt          Decrypt NCCH partition.\n"
 		//"  --initdata=file    Specify Initial Data file path.\n"
 		"CIA options:\n"
 		"  -n, --ncch=index   Specify NCCH partition index.\n"

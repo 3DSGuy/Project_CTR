@@ -20,7 +20,8 @@ public:
 	void setVerifyMode(bool verify);
 	void setExtractPath(const tc::io::Path& extract_path);
 	void setContentIndex(size_t index);
-	
+	void setDecryptNcch(bool decryptNcch);
+
 	// ncch settings passed on
 	void setRawMode(bool raw);
 	void setPlainMode(bool plain);
@@ -38,6 +39,7 @@ private:
 	bool mVerify;
 	tc::Optional<tc::io::Path> mExtractPath;
 	size_t mContentIndex;
+	bool mDecryptNcch;
 
 	int64_t mBlockSize;
 	int64_t mUsedImageSize;

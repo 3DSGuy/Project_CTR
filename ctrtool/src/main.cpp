@@ -113,6 +113,7 @@ int umain(const std::vector<std::string>& args, const std::vector<std::string>& 
 			proc.setRawMode(set.opt.raw);
 			proc.setPlainMode(set.opt.plain);
 			proc.setShowSyscallName(set.exheader.show_syscalls_as_names);
+			proc.setDecryptNcch(set.rom.decrypt_ncch);
 			proc.setNcchRegionProcessOutputMode(ctrtool::NcchProcess::NcchRegion_Header, set.opt.info, false, tc::Optional<tc::io::Path>(), tc::Optional<tc::io::Path>());
 			proc.setNcchRegionProcessOutputMode(ctrtool::NcchProcess::NcchRegion_ExHeader, set.opt.info, false, set.ncch.exheader_path, tc::Optional<tc::io::Path>());
 			proc.setNcchRegionProcessOutputMode(ctrtool::NcchProcess::NcchRegion_PlainRegion, false, false, set.ncch.plainregion_path, tc::Optional<tc::io::Path>());
