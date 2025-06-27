@@ -641,6 +641,7 @@ void ctrtool::SettingsInitializer::usage_text()
 		"  --tik=file         Specify Ticket file path.\n"
 		"  --tmd=file         Specify TMD file path.\n"
 		"  --footer=file      Specify Footer file path.\n"
+		"  --decrypt          Decrypt NCCH partition.\n"
 		"NCCH options:\n"
 		"  --exheader=file    Specify Extended Header file path.\n"
 		"  --logo=file        Specify Logo file path.\n"

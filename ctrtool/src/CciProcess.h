@@ -20,13 +20,13 @@ public:
 	void setVerifyMode(bool verify);
 	void setExtractPath(const tc::io::Path& extract_path);
 	void setContentIndex(size_t index);
-	void setDecryptNcch(bool decryptNcch);
 
 	// ncch settings passed on
 	void setRawMode(bool raw);
 	void setPlainMode(bool plain);
 	void setShowSyscallName(bool show_name);
 	void setNcchRegionProcessOutputMode(NcchProcess::NcchRegion region, bool show_info, bool show_fs, const tc::Optional<tc::io::Path>& bin_extract_path, const tc::Optional<tc::io::Path>& fs_extract_path);
+	void setDecryptNcch(bool decryptNcch);
 
 	void process();
 private:
