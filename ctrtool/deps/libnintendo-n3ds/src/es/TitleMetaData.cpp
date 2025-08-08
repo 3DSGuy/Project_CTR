@@ -49,8 +49,18 @@ ntd::n3ds::es::TitleMetaDataDeserialiser::TitleMetaDataDeserialiser(const std::s
 	*/
 
 	// determine if the TMD is the correct size given expected number of ESV1ContentMeta entries
-	size_t cmd_table_num = tmd->v1Head.cmdGroups[0].nCmds.unwrap();
-	size_t tmd_full_size = sizeof(brd::es::ESV1TitleMeta) + (cmd_table_num * sizeof(brd::es::ESV1ContentMeta));
+	size_t total_contents_num = 0;
+	size_t num_cmd_groups = 0;
+	for (const auto &cmd_group : tmd->v1Head.cmdGroups)
+	{
+		if (cmd_group.nCmds.unwrap())
+		{
+			++num_cmd_groups;
+			total_contents_num += cmd_group.nCmds.unwrap();
+		}
+	}
+
+	size_t tmd_full_size = sizeof(brd::es::ESV1TitleMeta) + (total_contents_num * sizeof(brd::es::ESV1ContentMeta));
 
 	if (tmd_stream->length() < (tmd_full_size))
 	{
@@ -81,10 +91,12 @@ ntd::n3ds::es::TitleMetaDataDeserialiser::TitleMetaDataDeserialiser(const std::s
 	}
 
 	// verify ESV1ContentMeta array
-	tc::crypto::GenerateSha256Hash(hash.data(), (byte_t*)&tmd->contents, cmd_table_num * sizeof(brd::es::ESV1ContentMeta));
-	if (memcmp(hash.data(), tmd->v1Head.cmdGroups[0].groupHash.data(), hash.size()) != 0)
-	{
-		throw tc::ArgumentOutOfRangeException(mModuleLabel, "TMD had invalid CMD group[0] hash.");
+	for (size_t i = 0; i < num_cmd_groups; i++) {
+		tc::crypto::GenerateSha256Hash(hash.data(), (byte_t*)&tmd->contents[tmd->v1Head.cmdGroups[i].offset], tmd->v1Head.cmdGroups[i].nCmds.unwrap() * sizeof(brd::es::ESV1ContentMeta));
+		if (memcmp(hash.data(), tmd->v1Head.cmdGroups[i].groupHash.data(), hash.size()) != 0)
+		{
+			throw tc::ArgumentOutOfRangeException(mModuleLabel, "TMD had invalid CMD group hash.");
+		}
 	}
 
 	// verify other fields
@@ -129,8 +141,8 @@ ntd::n3ds::es::TitleMetaDataDeserialiser::TitleMetaDataDeserialiser(const std::s
 	this->ctr_custom_data.save_data_size = custom_data->ctr.save_data_size;
 	this->ctr_custom_data.is_snake_only = custom_data->ctr.flag.test(0);
 
-	// process ESV1ContentMeta entries 
-	for (size_t i = 0; i < cmd_table_num; i++)
+	// process ESV1ContentMeta entries
+	for (size_t i = 0; i < total_contents_num; i++)
 	{
 		this->content_info.push_back(ContentInfo(
 			tmd->contents[i].cid.unwrap(),
