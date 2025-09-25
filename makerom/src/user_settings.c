@@ -100,6 +100,7 @@ void SetDefaults(user_settings *set)
 	set->ncch.noCodePadding = false;
 	set->ncch.baremetal = false;
 	set->ncch.pageSize = DEFAULT_STACK_SIZE;
+	set->ncch.ktrProgramId = false;
 
 	// RSF Settings
 	clrmem(&set->common.rsfSet, sizeof(rsf_settings));

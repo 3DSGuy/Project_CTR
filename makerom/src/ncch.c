@@ -234,6 +234,7 @@ int GetBasicOptions(ncch_settings *ncchset, user_settings *usrset)
 	ncchset->options.UseOnSD = ncchset->rsfSet->Option.UseOnSD;
 	ncchset->options.Encrypt = ncchset->rsfSet->Option.EnableCrypt;
 	ncchset->options.FreeProductCode = ncchset->rsfSet->Option.FreeProductCode;
+	ncchset->options.KtrProgramId = ncchset->rsfSet->Option.UseKtrProgramId;
 	ncchset->options.IsCfa = (usrset->ncch.ncchType == CFA);
 	ncchset->options.IsBuildingCodeSection = (usrset->ncch.elfPath != NULL);
 	ncchset->options.UseRomFS = ((ncchset->rsfSet->RomFs.RootPath && strlen(ncchset->rsfSet->RomFs.RootPath) > 0) || usrset->ncch.romfsPath);

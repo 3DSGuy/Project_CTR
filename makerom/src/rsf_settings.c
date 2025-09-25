@@ -64,6 +64,7 @@ void GET_Option(ctr_yaml_context *ctx, rsf_settings *rsf)
 		else if(cmpYamlValue("EnableCompress",ctx)) SetBoolYAMLValue(&rsf->Option.EnableCompress,"EnableCompress",ctx);
 		else if(cmpYamlValue("FreeProductCode",ctx)) SetBoolYAMLValue(&rsf->Option.FreeProductCode,"FreeProductCode",ctx);
 		else if(cmpYamlValue("UseOnSD",ctx)) SetBoolYAMLValue(&rsf->Option.UseOnSD,"UseOnSD",ctx);
+		else if(cmpYamlValue("UseKtrProgramId",ctx)) SetBoolYAMLValue(&rsf->Option.UseKtrProgramId,"UseKtrProgramId",ctx);
 		else{
 			fprintf(stderr,"[RSF ERROR] Unrecognised key '%s'\n",GetYamlString(ctx));
 			ctx->error = YAML_UNKNOWN_KEY;

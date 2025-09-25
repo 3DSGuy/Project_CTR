@@ -22,6 +22,7 @@ typedef struct
 		bool UseRomFS;
 		bool noCodePadding;
 		bool baremetal;
+		bool KtrProgramId;
 
 		bool useSecCrypto;
 		u8 keyXID;

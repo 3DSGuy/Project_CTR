@@ -75,6 +75,9 @@ int GetProgramID(u64 *dest, rsf_settings *rsf, bool IsForExheader)
 	programId |= (u64)uniqueId<<8;
 	programId |= (u64)category<<32;
 	programId |= (u64)type<<48;
+	
+	if (rsf->Option.UseKtrProgramId)
+		programId |= 0x20000000;
 
 	*dest = programId;
 

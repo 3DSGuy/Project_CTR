@@ -70,6 +70,7 @@ typedef struct
 		bool EnableCompress;
 		bool FreeProductCode;
 		bool UseOnSD;
+		bool UseKtrProgramId;
 	} Option;
 	
 	struct{
@@ -271,6 +272,7 @@ typedef struct
 		bool baremetal; // abuse K9/LGY K11's lack of memory management to support arbitrary VMA and RWX phdr
 		u32 pageSize; // Memory page size (256 for Kernel9, 4096 for anything else)
 		bool useSecCrypto;
+		bool ktrProgramId;
 		u8 keyXID;
 	} ncch; // Ncch0 Build
 	
