@@ -775,6 +775,20 @@ void ctrtool::CiaProcess::extractCia()
 			{
 				fmt::print(stderr, "[{} LOG] Saving content {:04x} to {}...\n", mModuleLabel, itr->second.cindex, out_path.to_string());
 			}
+
+			if (mDecryptNcch)
+			{
+				if (mVerbose)
+				{
+					fmt::print(stderr, "[{} LOG] Decrypting NCCH partition before saving {}...\n", mModuleLabel, out_path.to_string());
+				}
+
+				NcchProcess ncchProcess;
+				ncchProcess.setInputStream(in_stream);
+				ncchProcess.setVerboseMode(mVerbose);
+				ncchProcess.setKeyBag(mKeyBag);
+				ncchProcess.decryptNcchStream(in_stream);
+			}
 			
 			writeStreamToFile(in_stream, out_path, cache);
 		}
@@ -955,4 +969,9 @@ std::string ctrtool::CiaProcess::getCertificatePublicKeyTypeString(brd::es::ESCe
 std::string ctrtool::CiaProcess::getTitleVersionString(uint16_t version)
 {
 	return fmt::format("{major:d}.{minor:d}.{build:d}", fmt::arg("major", (uint32_t)((version >> 10) & 0x3F)), fmt::arg("minor", (uint32_t)((version >> 4) & 0x3F)), fmt::arg("build", (uint32_t)(version & 0xF)));
+}
+
+void ctrtool::CiaProcess::setDecryptNcch(bool decryptNcch)
+{
+	mDecryptNcch = decryptNcch;
 }

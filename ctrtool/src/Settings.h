@@ -91,6 +91,7 @@ struct Settings
 	{
 		size_t content_process_index;
 		tc::Optional<tc::io::Path> content_extract_path;
+		bool decrypt_ncch;
 	} rom;
 
 	// CIA options
@@ -142,6 +143,7 @@ struct Settings
 
 		rom.content_process_index = 0;
 		rom.content_extract_path = tc::Optional<tc::io::Path>();
+		rom.decrypt_ncch = false;
 
 		cia.certs_path = tc::Optional<tc::io::Path>();
 		cia.tik_path = tc::Optional<tc::io::Path>();

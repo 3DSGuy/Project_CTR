@@ -35,6 +35,7 @@ public:
 	void setPlainMode(bool plain);
 	void setShowSyscallName(bool show_name);
 	void setNcchRegionProcessOutputMode(NcchProcess::NcchRegion region, bool show_info, bool show_fs, const tc::Optional<tc::io::Path>& bin_extract_path, const tc::Optional<tc::io::Path>& fs_extract_path);
+	void setDecryptNcch(bool decryptNcch);
 
 	void process();
 private:
@@ -53,6 +54,7 @@ private:
 	tc::Optional<tc::io::Path> mContentExtractPath;
 	tc::Optional<tc::io::Path> mFooterExtractPath;
 	size_t mContentIndex;
+	bool mDecryptNcch;
 
 	// process variables
 	ntd::n3ds::CiaHeader mHeader;

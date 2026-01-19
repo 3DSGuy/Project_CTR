@@ -32,6 +32,9 @@ public:
 	void setRegionProcessOutputMode(NcchRegion region, bool show_info, bool show_fs, const tc::Optional<tc::io::Path>& bin_extract_path, const tc::Optional<tc::io::Path>& fs_extract_path);
 
 	void process();
+
+	// decrypt NCCH stream
+	void decryptNcchStream(std::shared_ptr<tc::io::IStream>& outStream);
 private:
 	std::string mModuleLabel;
 
