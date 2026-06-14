@@ -11,6 +11,7 @@
 #include "tik_build.h"
 #include "tmd_build.h"
 #include "titleid.h"
+#include "titlever.h"
 #include "certs.h"
 
 const int CIA_ALIGN_SIZE = 0x40;
@@ -28,8 +29,6 @@ int ProcessContentFiles(cia_settings *ciaset, user_settings *usrset);
 int ImportNcchContent(cia_settings *ciaset, user_settings *usrset);
 int GetSettingsFromSrl(cia_settings *ciaset);
 int GetSettingsFromCci(cia_settings *ciaset);
-
-u16 SetupVersion(u16 major, u16 minor, u16 micro);
 
 void GetContentHashes(cia_settings *ciaset);
 void EncryptContent(cia_settings *ciaset);
@@ -183,9 +182,9 @@ int GetSettingsFromUsrset(cia_settings *ciaset, user_settings *usrset)
 	ciaset->cert.signerCrlVersion = 0;
 
 	ciaset->common.useCxiRemasterVersion = !usrset->cia.useFullTitleVer;
-	for(int i = 0; i < 3; i++){
-		ciaset->common.titleVersion[i] = usrset->cia.titleVersion[i];
-	}
+	ciaset->common.titleVerMajor = usrset->cia.titleVerMajor;
+	ciaset->common.titleVerMinor = usrset->cia.titleVerMinor;
+	ciaset->common.titleVerMicro = usrset->cia.titleVerMicro;
 
 	// Ticket Data
 	ciaset->tik.ticketId = 0x0004000000000000 | (u64GetRand() & 0x0000FFFFFFFFFFFF);
@@ -329,11 +328,11 @@ int GetTmdDataFromNcch(cia_settings *ciaset, u8 *ncch, ncch_info *ncch_ctx, u8 *
 	// If this is a CXI, and we have to pull version major from exheader...
 	if(!ciaset->content.IsCfa && ciaset->common.useCxiRemasterVersion){
 		// Setting remaster ver
-		ciaset->common.titleVersion[VER_MAJOR] = GetRemasterVersion_frm_exhdr(exhdr);
+		ciaset->common.titleVerMajor = GetRemasterVersion_frm_exhdr(exhdr);
 	}
 	
 	// Calculate u16 title version
-	ciaset->tmd.version = ciaset->tik.version = SetupVersion(ciaset->common.titleVersion[VER_MAJOR],ciaset->common.titleVersion[VER_MINOR],ciaset->common.titleVersion[VER_MICRO]);
+	ciaset->tmd.version = ciaset->tik.version = SetupVersion(ciaset->common.titleVerMajor,ciaset->common.titleVerMinor,ciaset->common.titleVerMicro);
 
 	free(exhdr);
 	return result;
@@ -520,7 +519,7 @@ int GetSettingsFromSrl(cia_settings *ciaset)
 	ciaset->tmd.twlFlag = ((hdr->reserved_flags[3] & 6) >> 1);
 
 	// Get Remaster Version
-	u16 version = SetupVersion(hdr->romVersion,ciaset->common.titleVersion[1],0);
+	u16 version = SetupVersion(hdr->romVersion,ciaset->common.titleVerMinor,0);
 	ciaset->tik.version = version;
 	ciaset->tmd.version = version;
 
@@ -595,11 +594,6 @@ int GetSettingsFromCci(cia_settings *ciaset)
 	}
 	ciaset->ciaSections.content.size = ciaset->content.totalSize;
 	return 0;
-}
-
-u16 SetupVersion(u16 major, u16 minor, u16 micro)
-{
-	return (((major << 10) & 0xFC00) | ((minor << 4) & 0x3F0) | (micro & 0xf));
 }
 
 void GetContentHashes(cia_settings *ciaset)

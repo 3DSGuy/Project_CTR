@@ -24,7 +24,9 @@ typedef struct
 	struct{
 		bool useCxiRemasterVersion;
 		u64 titleId;
-		u16 titleVersion[3];
+		u16 titleVerMajor;
+		u16 titleVerMinor;
+		u16 titleVerMicro;
 		u8 titleKey[16];
 	} common;
 	

@@ -8,22 +8,6 @@ typedef enum
 
 typedef enum
 {
-	VER_MAJOR,
-	VER_MINOR,
-	VER_MICRO
-} title_ver_index;
-
-typedef enum
-{
-	VER_MAX = 65535,
-	VER_MAJOR_MAX = 63,
-	VER_MINOR_MAX = 63,
-	VER_MICRO_MAX = 15,
-	VER_DVER_MAX = 4095,
-} title_ver_max;
-
-typedef enum
-{
 	CVER_DTYPE_TMD,
 	CVER_DTYPE_CIA,
 } cver_data_type;
@@ -295,7 +279,9 @@ typedef struct
 		bool useNormTitleVer;
 		bool useDataTitleVer;
 		bool useFullTitleVer;
-		u16 titleVersion[3];
+		u16 titleVerMajor;
+		u16 titleVerMinor;
+		u16 titleVerMicro;
 		
 		u32 deviceId;
 		u32 eshopAccId;

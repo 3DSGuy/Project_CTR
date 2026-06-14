@@ -1,5 +1,6 @@
 #include "lib.h"
-#include "version.h"
+#include "app_version.h"
+#include "titlever.h"
 
 // Private Constants
 static const u32 DEFAULT_STACK_SIZE = 0x1000;
@@ -495,9 +496,9 @@ int SetArgument(int argc, int i, char *argv[], user_settings *set)
 			fprintf(stderr, "[SETTING ERROR] Version: '%d' is too large, max: '%d'\n", ver, VER_MAX);
 			return USR_BAD_ARG;
 		}
-		set->cia.titleVersion[VER_MAJOR] = (ver >> 10) & VER_MAJOR_MAX;
-		set->cia.titleVersion[VER_MINOR] = (ver >> 4) & VER_MINOR_MAX;
-		set->cia.titleVersion[VER_MICRO] = ver & VER_MICRO_MAX;
+		set->cia.titleVerMajor = ExtractVersionMajor(ver);
+		set->cia.titleVerMinor = ExtractVersionMinor(ver);
+		set->cia.titleVerMicro = ExtractVersionMicro(ver);
 		return 2;
 	}
 	else if (strcmp(argv[i], "-major") == 0) {
@@ -511,7 +512,7 @@ int SetArgument(int argc, int i, char *argv[], user_settings *set)
 			fprintf(stderr, "[SETTING ERROR] Major version: '%d' is too large, max: '%d'\n", ver, VER_MAJOR_MAX);
 			return USR_BAD_ARG;
 		}
-		set->cia.titleVersion[VER_MAJOR] = ver;
+		set->cia.titleVerMajor = ver;
 		return 2;
 	}
 	else if (strcmp(argv[i], "-minor") == 0) {
@@ -525,7 +526,7 @@ int SetArgument(int argc, int i, char *argv[], user_settings *set)
 			fprintf(stderr, "[SETTING ERROR] Minor version: '%d' is too large, max: '%d'\n", ver, VER_MINOR_MAX);
 			return USR_BAD_ARG;
 		}
-		set->cia.titleVersion[VER_MINOR] = ver;
+		set->cia.titleVerMinor = ver;
 		return 2;
 	}
 	else if (strcmp(argv[i], "-micro") == 0) {
@@ -540,7 +541,7 @@ int SetArgument(int argc, int i, char *argv[], user_settings *set)
 			fprintf(stderr, "[SETTING ERROR] Micro version: '%d' is too large, max: '%d'\n", ver, VER_MICRO_MAX);
 			return USR_BAD_ARG;
 		}
-		set->cia.titleVersion[VER_MICRO] = ver;
+		set->cia.titleVerMicro = ver;
 		return 2;
 	}
 	else if (strcmp(argv[i], "-dver") == 0) {
@@ -554,8 +555,8 @@ int SetArgument(int argc, int i, char *argv[], user_settings *set)
 			fprintf(stderr, "[SETTING ERROR] Data version: '%d' is too large, max: '%d'\n", ver, VER_DVER_MAX);
 			return USR_BAD_ARG;
 		}
-		set->cia.titleVersion[VER_MAJOR] = (ver >> 6) & VER_MAJOR_MAX;
-		set->cia.titleVersion[VER_MINOR] = ver & VER_MINOR_MAX;
+		set->cia.titleVerMajor = ExtractDataVersionMajor(ver);
+		set->cia.titleVerMinor = ExtractDataVersionMinor(ver);
 		return 2;
 	}
 	else if (strcmp(argv[i], "-deviceid") == 0) {
@@ -933,7 +934,7 @@ void PrintNoNeedParam(char *arg)
 
 void DisplayBanner(void)
 {
-	printf("%s v%d.%d.%d (C) %s\n", APP_NAME, VER_MAJOR, VER_MINOR, VER_PATCH, AUTHORS);
+	printf("%s v%d.%d.%d (C) %s\n", APP_NAME, APP_VER_MAJOR, APP_VER_MINOR, APP_VER_PATCH, APP_AUTHORS);
 	printf("Built: %s %s\n\n", __TIME__, __DATE__);
 }
 
