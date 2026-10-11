@@ -42,8 +42,8 @@ clean: clean_progs
 # Programs
 .PHONY: progs
 progs:
-	@$(foreach prog,$(PROJECT_PROGRAM_LOCAL_DIR), cd "$(prog)" && $(MAKE) deps program && cd "$(PROJECT_PATH)";)
+	@for prog in $(PROJECT_PROGRAM_LOCAL_DIR); do $(MAKE) -C "$$prog" deps program || exit 1; done
 
 .PHONY: clean_progs
 clean_progs:
-	@$(foreach prog,$(PROJECT_PROGRAM_LOCAL_DIR), cd "$(prog)" && $(MAKE) clean_deps clean && cd "$(PROJECT_PATH)";)
+	@for prog in $(PROJECT_PROGRAM_LOCAL_DIR); do $(MAKE) -C "$$prog" clean_deps clean || exit 1; done

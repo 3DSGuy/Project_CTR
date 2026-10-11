@@ -163,7 +163,7 @@ shared_lib: $(SRC_OBJ) create_binary_dir
 	@gcc -shared -Wl,-soname,$(PROJECT_SONAME) -o "$(PROJECT_BIN_PATH)/$(PROJECT_SO_FILENAME)" $(SRC_OBJ)
 
 # Build Program
-program: $(SRC_OBJ) create_binary_dir
+program: $(SRC_OBJ) create_binary_dir | deps
 	@echo LINK $(PROJECT_BIN_PATH)/$(PROJECT_NAME)
 	@$(CXX) $(ARCHFLAGS) $(SRC_OBJ) $(LIB) -o "$(PROJECT_BIN_PATH)/$(PROJECT_NAME)"
 
