@@ -1010,3 +1010,43 @@ void ctrtool::NcchProcess::getAesCounter(byte_t* counter, byte_t ncch_region)
 		tmp->begin_offset.wrap(mRegionInfo[ncch_region].offset);
 	}
 }
+
+void ctrtool::NcchProcess::decryptNcchStream(std::shared_ptr<tc::io::IStream>& outStream)
+{
+	importHeader();
+	determineRegionLayout();
+	determineRegionEncryption();
+
+	// merge mInputStream with decrypted NcchRegion_ExHeader, NcchRegion_ExeFs, NcchRegion_RomFs
+	std::vector<std::shared_ptr<tc::io::IStream>> streamSlices;
+	size_t inputStreamOffset = 0;
+	for (size_t i = 0; i < NcchRegionNum; i++)
+	{
+		if (i == NcchRegion_PlainRegion || i == NcchRegion_Logo) continue;
+
+		if (mRegionInfo[i].size)
+		{
+			streamSlices.push_back(std::make_shared<tc::io::SubStream>(tc::io::SubStream(mInputStream, inputStreamOffset, mRegionInfo[i].offset - inputStreamOffset)));
+
+			// update ncchflag[7] to 0x4 in NCCH header
+			// TODO: find a way to compute correct RSA-2048 signature in NCCH header
+			if (i == NcchRegion_Header)
+			{
+				size_t ncchflagOffset = 0x188;
+
+				streamSlices.push_back(std::make_shared<tc::io::SubStream>(tc::io::SubStream(mRegionInfo[i].ready_stream, 0, ncchflagOffset + 7)));
+				streamSlices.push_back(std::make_shared<tc::io::MemoryStream>(tc::io::MemoryStream(tc::ByteData({ 0x4 }))));
+				streamSlices.push_back(std::make_shared<tc::io::SubStream>(tc::io::SubStream(mRegionInfo[i].ready_stream, ncchflagOffset + 8, mRegionInfo[i].size - (ncchflagOffset + 8))));
+			}
+			else
+			{
+				streamSlices.push_back(mRegionInfo[i].ready_stream);
+			}
+
+			inputStreamOffset = mRegionInfo[i].offset + mRegionInfo[i].size;
+		}
+	}
+	streamSlices.push_back(std::make_shared<tc::io::SubStream>(tc::io::SubStream(mInputStream, inputStreamOffset, mInputStream->length() - inputStreamOffset)));
+
+	outStream = std::make_shared<tc::io::ConcatenatedStream>(tc::io::ConcatenatedStream(streamSlices));
+}

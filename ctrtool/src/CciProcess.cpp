@@ -25,7 +25,8 @@ ctrtool::CciProcess::CciProcess() :
 	mValidCryptoType(ValidState::Unchecked),
 	mDecryptedTitleKey(),
 	mNcchProcess(),
-	mFsReader()
+	mFsReader(),
+	mDecryptNcch(false)
 {
 	memset(&mHeader, 0, sizeof(mHeader));
 }
@@ -384,6 +385,21 @@ void ctrtool::CciProcess::extractFs()
 
 		// begin export
 		mFsReader->openFile(*itr, tc::io::FileMode::Open, tc::io::FileAccess::Read, in_stream);
+		// decrypt ncch
+		if (mDecryptNcch)
+		{
+			if (mVerbose)
+			{
+				fmt::print(stderr, "[{} LOG] Decrypting NCCH partition before saving {}...\n", mModuleLabel, out_path.to_string());
+			}
+
+			NcchProcess ncchProcess;
+			ncchProcess.setInputStream(in_stream);
+			ncchProcess.setVerboseMode(mVerbose);
+			ncchProcess.setKeyBag(mKeyBag);
+			ncchProcess.decryptNcchStream(in_stream);
+		}
+
 		local_fs.openFile(out_path, tc::io::FileMode::OpenOrCreate, tc::io::FileAccess::Write, out_stream);
 
 		in_stream->seek(0, tc::io::SeekOrigin::Begin);
@@ -586,4 +602,9 @@ std::string ctrtool::CciProcess::getCryptoTypeString(byte_t crypto_type)
 std::string ctrtool::CciProcess::getTitleVersionString(uint16_t version)
 {
 	return fmt::format("{major:d}.{minor:d}.{build:d}", fmt::arg("major", (uint32_t)((version >> 10) & 0x3F)), fmt::arg("minor", (uint32_t)((version >> 4) & 0x3F)), fmt::arg("build", (uint32_t)(version & 0xF)));
+}
+
+void ctrtool::CciProcess::setDecryptNcch(bool decryptNcch)
+{
+	mDecryptNcch = decryptNcch;
 }
