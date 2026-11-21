@@ -933,7 +933,7 @@ void PrintNoNeedParam(char *arg)
 
 void DisplayBanner(void)
 {
-	printf("%s v%d.%d.%d (C) %s\n", APP_NAME, VER_MAJOR, VER_MINOR, VER_PATCH, AUTHORS);
+	printf("%s v%d.%d.%d (C) %s\n", APP_NAME, APP_VER_MAJOR, APP_VER_MINOR, APP_VER_PATCH, AUTHORS);
 	printf("Built: %s %s\n\n", __TIME__, __DATE__);
 }
 
