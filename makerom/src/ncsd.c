@@ -712,13 +712,13 @@ bool IsCci(u8 *ncsd)
 u64 GetPartitionOffset(u8 *ncsd, u8 index)
 {
 	cci_hdr *hdr = (cci_hdr*)ncsd;
-	return (u64)u8_to_u64(hdr->offset_sizeTable[index].offset,LE) * (u64)GetCtrBlockSize(hdr->flags[cciflag_MEDIA_BLOCK_SIZE]);
+	return (u64)u8_to_u32(hdr->offset_sizeTable[index].offset,LE) * (u64)GetCtrBlockSize(hdr->flags[cciflag_MEDIA_BLOCK_SIZE]);
 }
 
 u64 GetPartitionSize(u8 *ncsd, u8 index)
 {
 	cci_hdr *hdr = (cci_hdr*)ncsd;
-	return (u64)u8_to_u64(hdr->offset_sizeTable[index].size,LE) * (u64)GetCtrBlockSize(hdr->flags[cciflag_MEDIA_BLOCK_SIZE]);
+	return (u64)u8_to_u32(hdr->offset_sizeTable[index].size,LE) * (u64)GetCtrBlockSize(hdr->flags[cciflag_MEDIA_BLOCK_SIZE]);
 }
 
 u8* GetPartition(u8 *ncsd, u8 index)
